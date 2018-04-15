@@ -1,1 +1,6 @@
 target/
+
+vue-visual-project/node_modules/
+
+/weather-webapi-project/node_modules/
+/weather-webapi-project/package-lock.json
