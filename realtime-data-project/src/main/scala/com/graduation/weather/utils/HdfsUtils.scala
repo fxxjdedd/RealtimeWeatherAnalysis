@@ -204,7 +204,10 @@ object HdfsUtils {
       }
       reader
     } catch {
-      case e: Exception => throw new Exception("exception!")
+      case e: Exception => {
+      println(e)
+      throw new Exception("exception!")
+      }
     }
   }
 }
