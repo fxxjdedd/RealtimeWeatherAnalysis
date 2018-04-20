@@ -72,7 +72,7 @@ router.get('/get', async(request, response, next)=>{
     }
     finally
     {
-        // ¹Ø±ÕÁ´½Ó
+        // å…³é—­é“¾æŽ¥
         if(client)
             client.quit();
     }
