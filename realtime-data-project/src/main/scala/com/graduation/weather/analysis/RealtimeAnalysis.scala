@@ -69,12 +69,13 @@ object RealtimeAnalysis {
     // redis
     lazy val pool = new JedisPool(new GenericObjectPoolConfig(), "localhost", 6379, 30000)
     val dbIndex = 1
-    val listKey = "weather"
     // kafka streaming
     val kafkaStream = KafkaUtils.createDirectStream[String, String, StringDecoder, StringDecoder](ssc, kafkaParams, topics)
 
     val streamData = kafkaStream.map { line =>
-      val splits = line._2.split(" ")
+      val splits = line._2.split(" ").filter { item =>
+        item.length() > 0
+      }
       Some(Weather(splits(0), splits(1), splits(2), splits(3),
         splits(4), splits(5), splits(6), splits(7), splits(8),
         splits(9), splits(10), splits(11), splits(12), splits(13),
@@ -85,7 +86,7 @@ object RealtimeAnalysis {
         val jedis = pool.getResource
         jedis.select(1)
         logger.info(s"### writing into redis with data: ${new Gson().toJson(data.get)}")
-        jedis.lpush(listKey, new Gson().toJson(data.get))
+        jedis.lpush(data.get.city, new Gson().toJson(data.get))
         jedis.close()
       }
     }
