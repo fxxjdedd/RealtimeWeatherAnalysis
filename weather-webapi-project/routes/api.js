@@ -50,10 +50,10 @@ var queryDataByRange = async(start,end)=>{
         var endIndex = count - 1;
         var findIndex = -1;
         //使用插值查找
-        while(1)
-        {
+        // while(1)
+        // {
             
-        } 
+        // } 
 
 
     } catch (error) {
@@ -67,7 +67,45 @@ var queryDataByRange = async(start,end)=>{
 
 } 
 
-queryDataByRange(0,1);
+var queryCityList = async()=>{
+    var ret = [];
+
+    var client;
+    try {
+        client = redis.createClient(redisPort,redisIp);
+        const selectAsync = promisify(client.select).bind(client);
+        const keysAsync =  promisify(client.keys).bind(client);
+        const error = await selectAsync("1");
+
+        if(error != "OK")   
+        {
+            throw error;
+        }
+        ret = await keysAsync("*");
+    }
+    catch(error)
+    {
+        console.log(error);
+        throw error;
+    }
+    finally
+    {
+        if(client)
+            client.quit();
+        return ret;
+    }
+
+}
+
+var sendJson = async(response,code,message,data)=>{
+    response.writeHead(200, { "Content-Type": "application/json" });
+    response.end(JSON.stringify({
+        code: code,
+        message: message,
+        data:data
+    }));
+}
+
 
 router.get('/get', async(request, response, next)=>{
    
@@ -138,6 +176,14 @@ router.get('/get', async(request, response, next)=>{
 
 router.get('/query',async(request, response, next)=>{
     
+});
+
+router.get('/cityList',async(request, response, next)=>{
+    try {
+        sendJson(response,0,"invoke ok!",await queryCityList());
+    } catch (error) {
+        sendJson(response,1,error,null);
+    }
 });
 
 module.exports = router;
