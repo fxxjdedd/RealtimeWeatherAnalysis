@@ -1,2 +1,2 @@
 export {default as fetch} from './fetch'
-export {timeDate} from './timeData'
+export {timeDate} from './timeData' 
