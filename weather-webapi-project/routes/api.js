@@ -192,8 +192,6 @@ router.get('/get', async (request, response, next) => {
         if(!redisListName)
             redisListName = "济南";
 
-        response.writeHead(200, { "Content-Type": "application/json" });
-
         let index = parseInt(request.query.index);
         let num = parseInt(request.query.num);
 
@@ -227,17 +225,9 @@ router.get('/get', async (request, response, next) => {
             dataArray.push(JSON.parse(dataString));
         }
 
-        response.end(JSON.stringify({
-            code: errCode,
-            message: "invoke ok!",
-            data: dataArray
-        }));
-
+        sendJson(response,0,"invoke ok!",dataArray);
     } catch (e) {
-        response.end(JSON.stringify({
-            code: errCode,
-            message: e.toString()
-        }));
+        sendJson(response,1,e,null);
     }
     finally {
         // 关闭链接
