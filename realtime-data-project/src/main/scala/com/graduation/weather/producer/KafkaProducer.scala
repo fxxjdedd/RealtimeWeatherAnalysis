@@ -64,14 +64,14 @@ object KafkaProducer {
           // 一行是一天
           var lines = Stream.continually(r.readLine()).takeWhile(_ != null)
           lines.toArray.slice(1, lines.length).foreach { line =>
-            logger.info(s"### sending kafka msg ###")
+            logger.info(s"### sending kafka msg $city ###")
             val newline = line.replace(city._1.replace("-", " "), city._2)
             producer.send(new ProducerRecord(topic, newline))
             logger.info(s"### sent kafka msg: $newline ###")
             Thread.sleep(3000)
           }
         case Failure(f) =>
-          logger.warn(s"### year: $year 获取BufferdReader失败###");
+          logger.warn(s"### year: $year-$city 获取BufferdReader失败###");
           f.printStackTrace()
       }
 
