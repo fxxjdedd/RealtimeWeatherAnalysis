@@ -178,7 +178,7 @@ var queryCityList = async (startTime, endTime) => {
 
 var sendJson = async (response, code, message, data) => {
     response.writeHead(200, {
-        "Content-Type": "application/json",
+        "Content-Type": "application/json;charset=UTF-8",
         "Access-Control-Allow-Origin": "*"
     });
 
