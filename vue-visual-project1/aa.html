@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+        function func(arr) {
+	var tabels = 0;
+    var total = 0;
+    var tmp = [].concat(arr)
+    var min =  tmp.sort()[0];
+    arr.forEach(function(item,index){
+    	total += item 
+        arr[index] = item - min
+    })
+    tabels = total/3;
+	if(tabels < min){
+    	tabels = min;
+    }
+    min = tmp.sort()[0]
+    if((tabels + min)<=total/3){
+    	tabels = tabels + min
+    }else{
+    	tabels = parseInt(total/3)
+    }
+    return tabels;
+}
+function getData(arr){
+	for(const item of arr){
+    	console.log(func(item))
+    }
+}
+var n = 0,
+    arr = [[5,4,3],[2,3,3]];
+
+getData(arr)
+    </script>
+</body>
+</html>

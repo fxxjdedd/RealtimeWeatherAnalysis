@@ -1,4 +1,3 @@
 target/
 
-vue-visual-project/node_modules/
-
+node_modules/
