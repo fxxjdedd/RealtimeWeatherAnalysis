@@ -86,7 +86,7 @@ object RealtimeAnalysis {
         val jedis = pool.getResource
         jedis.select(1)
         logger.info(s"### writing into redis with data: ${new Gson().toJson(data.get)}")
-        jedis.lpush(data.get.city, new Gson().toJson(data.get))
+        jedis.rpush(data.get.city, new Gson().toJson(data.get))
         jedis.close()
       }
     }
