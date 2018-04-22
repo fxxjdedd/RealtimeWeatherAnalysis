@@ -10,7 +10,7 @@
             :value="item">
           </el-option>
         </el-select>
-      </div>   
+      </div>
       <div class="time-filter" v-if="timeFilter">
         <span>以</span>
         <el-select class="timeType" @change="timeTypeChange" v-model="timeType" placeholder="请选择">

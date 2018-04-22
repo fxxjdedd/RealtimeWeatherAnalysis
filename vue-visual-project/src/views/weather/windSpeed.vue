@@ -4,21 +4,21 @@
       <el-row>
         <el-col :span="12">
             <div>
-                <ve-scatter :data="chartData" 
-                            :grid="chartGrid" 
-                            :visual-map="chartVisualMap" 
+                <ve-scatter :data="chartData"
+                            :grid="chartGrid"
+                            :visual-map="chartVisualMap"
                             :settings="chartSettings"
                             height="500px"></ve-scatter>
             </div>
         </el-col>
         <el-col :span="12">
-                <ve-pie :data="chartData1" 
+            <ve-pie :data="chartData1"
                         :settings="chartSettings1"
                         height="500px"></ve-pie>
         </el-col>
     </el-row>
     </el-main>
-    
+
   </el-container>
 </template>
 <script>
@@ -33,12 +33,12 @@ export default {
         columns: ['日期', '余额', '数量', '年龄'],
         rows: {
           '上海': [
-          { '日期': '1-1', '余额': 123, '年龄': 3, '数量': 1244 },
-          { '日期': '1-2', '余额': 1223, '年龄': 6, '数量': 2344 },
-          { '日期': '1-3', '余额': 7123, '年龄': 9, '数量': 3245 },
-          { '日期': '1-4', '余额': 4123, '年龄': 12, '数量': 4355 },
-          { '日期': '1-5', '余额': 3123, '年龄': 15, '数量': 4564 },
-          { '日期': '1-6', '余额': 2323, '年龄': 20, '数量': 6537 }
+            { '日期': '1-1', '余额': 123, '年龄': 3, '数量': 1244 },
+            { '日期': '1-2', '余额': 1223, '年龄': 6, '数量': 2344 },
+            { '日期': '1-3', '余额': 7123, '年龄': 9, '数量': 3245 },
+            { '日期': '1-4', '余额': 4123, '年龄': 12, '数量': 4355 },
+            { '日期': '1-5', '余额': 3123, '年龄': 15, '数量': 4564 },
+            { '日期': '1-6', '余额': 2323, '年龄': 20, '数量': 6537 }
           ]
         }
       }
@@ -79,7 +79,7 @@ export default {
 
 </script>
 <style scoped>
-.view-contain {  
+.view-contain {
   /* width: 70%; */
   /* height: 100%; */
   /* background: red; */

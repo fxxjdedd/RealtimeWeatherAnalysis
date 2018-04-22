@@ -5,26 +5,26 @@
           <el-col :span="16">
               <el-row>
                   <el-col :span="10">
-                      <ve-histogram :data="chartData" 
+                      <ve-histogram :data="chartData"
                               :settings="chartSettings"
                               height="200px"></ve-histogram>
                   </el-col>
                   <el-col :span="10" :offset="4">
-                      <ve-histogram :data="chartData" 
+                      <ve-histogram :data="chartData"
                               :settings="chartSettings"
                               height="200px"></ve-histogram>
                   </el-col>
               </el-row>
               <el-row>
                   <el-col :span="24">
-                    <ve-histogram :data="chartData" 
+                    <ve-histogram :data="chartData"
                               :settings="chartSettings"
                               height="300px"></ve-histogram>
                 </el-col>
               </el-row>
           </el-col>
           <el-col :span="8">
-               <ve-pie :data="chartData1" 
+               <ve-pie :data="chartData1"
                         :settings="chartSettings1"
                         height="300px"></ve-pie>
             <div style="height:150px;background-color:green">
@@ -85,4 +85,3 @@ export default {
   /* margin:0 auto; */
 }
 </style>
-
