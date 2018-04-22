@@ -66,9 +66,9 @@ let insertValueSearch = async (value, isAllowRight, isAllowLeft, lindexAsync, re
 
             //let
             let partition = parseInt((value - dataStartTime) * (endIndex - startIndex + 1) / (dataEndTime - dataStartTime));
-            if(partition < startIndex)
+            if (partition < startIndex)
                 partition = startIndex;
-            if(partition > endIndex)
+            if (partition > endIndex)
                 partition = endIndex;
 
             let partitionJson = JSON.parse(await lindexAsync(redisKeyName, partition));
@@ -120,16 +120,16 @@ var queryDataByRange = async (startTime, endTime, keyName) => {
         if (isNaN(count) || count <= 0) {
             throw "count == 0";
         }
- 
+
         var startIndex = await insertValueSearch(startTime, false, true, lindexAsync, keyName, count);
         if (startIndex == -1)
             throw "no find start in the range";
-     
+
         var endIndex = await insertValueSearch(endTime, true, false, lindexAsync, keyName, count);
         if (endIndex == -1)
             throw "no find end in the range";
-    
-        ret = await lrangeAsync(keyName,startIndex,endIndex);
+
+        ret = await lrangeAsync(keyName, startIndex, endIndex);
 
     } catch (error) {
         throw error;
@@ -186,6 +186,12 @@ router.get('/get', async (request, response, next) => {
     var client;
     var errCode = 0;
     try {
+
+        var redisListName = request.query.city;
+
+        if(!redisListName)
+            redisListName = "济南";
+
         response.writeHead(200, { "Content-Type": "application/json" });
 
         let index = parseInt(request.query.index);
@@ -248,7 +254,7 @@ router.get('/query', async (request, response, next) => {
     try {
 
         let city = request.query.city;
-   
+
         if (!city) {
             city = "济南";
         }
@@ -260,8 +266,14 @@ router.get('/query', async (request, response, next) => {
             startTime = 0;
         if (isNaN(endTime))
             endTime = 20190101;
-      
-        sendJson(response, 0, "invoke ok!", await queryDataByRange(startTime, endTime,city));
+
+        var dataArray = [];
+        let queryRes = await queryDataByRange(startTime, endTime, city)
+        for (var i in queryRes) {
+            var dataString = queryRes[i];
+            dataArray.push(JSON.parse(dataString));
+        }
+        sendJson(response, 0, "invoke ok!", dataArray);
     } catch (error) {
         sendJson(response, 1, error, null);
     }
