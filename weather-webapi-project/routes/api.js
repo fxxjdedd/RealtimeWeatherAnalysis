@@ -99,7 +99,7 @@ let insertValueSearch = async (value, isAllowRight, isAllowLeft, lindexAsync, re
  * @param {结束时间} endTime
  * @returns 返回的数据集 
  */
-var queryDataByRange = async (startTime, endTime, keyName) => {
+var queryDataByRange = async (startTime, endTime, keyName,interval) => {
     var redisClient;
     var ret = [];
     try {
@@ -128,8 +128,17 @@ var queryDataByRange = async (startTime, endTime, keyName) => {
         var endIndex = await insertValueSearch(endTime, true, false, lindexAsync, keyName, count);
         if (endIndex == -1)
             throw "no find end in the range";
+        if (isNaN(interval)) {
+            ret = await lrangeAsync(keyName, startIndex, endIndex);
+        }
+        else {
 
-        ret = await lrangeAsync(keyName, startIndex, endIndex);
+            for (let i = startIndex; i < endIndex; i += interval) {
+                let singleRes = await lindexAsync(keyName, i);
+                ret.push(singleRes);
+            }
+        }
+
 
     } catch (error) {
         throw error;
@@ -189,7 +198,7 @@ router.get('/get', async (request, response, next) => {
 
         var redisListName = request.query.city;
 
-        if(!redisListName)
+        if (!redisListName)
             redisListName = "济南";
 
         let index = parseInt(request.query.index);
@@ -225,9 +234,9 @@ router.get('/get', async (request, response, next) => {
             dataArray.push(JSON.parse(dataString));
         }
 
-        sendJson(response,0,"invoke ok!",dataArray);
+        sendJson(response, 0, "invoke ok!", dataArray);
     } catch (e) {
-        sendJson(response,1,e,null);
+        sendJson(response, 1, e, null);
     }
     finally {
         // 关闭链接
@@ -251,6 +260,8 @@ router.get('/query', async (request, response, next) => {
 
         let startTime = parseInt(request.query.startTime);
         let endTime = parseInt(request.query.endTime);
+        let interval = parseInt(request.query.interval);
+
 
         if (isNaN(startTime) || startTime < 0)
             startTime = 0;
@@ -258,7 +269,7 @@ router.get('/query', async (request, response, next) => {
             endTime = 20190101;
 
         var dataArray = [];
-        let queryRes = await queryDataByRange(startTime, endTime, city)
+        let queryRes = await queryDataByRange(startTime, endTime, city, interval)
         for (var i in queryRes) {
             var dataString = queryRes[i];
             dataArray.push(JSON.parse(dataString));
