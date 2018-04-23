@@ -1,23 +1,52 @@
 <template>
   <div id="app">
-    <img src="./assets/logo.png">
-    <router-view/>
+    <el-container>
+      <el-header>
+        <nav-bar>
+          <time-filter></time-filter>
+        </nav-bar>
+      </el-header>
+      <el-container>
+        <el-aside width="200px">
+          <side-bar></side-bar>
+        </el-aside>
+        <el-main>
+          <router-view></router-view>
+        </el-main>
+      </el-container>
+    </el-container>
   </div>
+
 </template>
 
 <script>
+import {NavBar, SideBar, TimeFilter} from '@/components/commons'
 export default {
-  name: 'App'
+  name: 'App',
+  components: {
+    NavBar,
+    SideBar,
+    TimeFilter
+  }
 }
 </script>
 
-<style>
+<style lang="scss">
 #app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
+  font-family: "Avenir", Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
+}
+body {
+  margin: 0
+}
+.el-header {
+  margin: 0;
+  padding: 0;
+}
+.el-aside {
+  border-top: 1px solid #eee;
 }
 </style>
