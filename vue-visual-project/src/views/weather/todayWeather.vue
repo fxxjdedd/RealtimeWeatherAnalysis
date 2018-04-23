@@ -15,7 +15,6 @@
     <el-row :gutter="20" class="TodayWeather__Middle">
       <el-col :span="6">
         <el-card class="TodayWeather__Middle-card">
-
         </el-card>
       </el-col>
       <el-col :span="6">
@@ -34,10 +33,10 @@
         </el-card>
       </el-col>
     </el-row>
-    <el-row gutter="20" class="TodayWeather__Bottom">
+    <el-row :gutter="20" class="TodayWeather__Bottom">
       <el-col :span="16">
         <el-card class="TodayWeather__Bottom-card">
-
+          <ve-line></ve-line>
         </el-card>
       </el-col>
       <el-col :span="8" class="TodayWeather__Bottom__Right">
@@ -58,9 +57,27 @@
 
 <script>
 import {TimeBox} from '@/components/commons'
+import {mapGetters} from 'vuex'
 export default {
   components: {
     TimeBox
+  },
+  watch: {
+    curFilterData: {
+      deep: true,
+      handler (value) {
+        console.log(value)
+      }
+    }
+  },
+  computed: {
+    ...mapGetters([
+      'filterData'
+    ]),
+    curFilterData () {
+      return this.filterData[this.$route.name]
+    }
+
   }
 }
 </script>
@@ -86,7 +103,7 @@ export default {
       flex-direction: column;
       justify-content: space-between;
       &-card {
-        height: 180px;
+        height: 185px;
       }
     }
   }

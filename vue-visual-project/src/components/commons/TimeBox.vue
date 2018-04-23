@@ -1,18 +1,18 @@
 <template>
   <div class="TimeBox">
     <div :span="8" class="TimeBox__Date">
-      <div class="TimeBox__Date-top">{{data.week}}</div>
+      <div class="TimeBox__Date-top">{{week}}</div>
       <div class="TimeBox__Date-bottom">
-        <div>{{data.day}}</div>
-        <div>{{data.month}}</div>
+        <div>{{day}}</div>
+        <div>{{month}}</div>
       </div>
     </div>
     <div :span="16" class="TimeBox__Time">
       <div class="TimeBox__Time-top">
-        <div>{{data.tag}}</div>
+        <div>{{tag}}</div>
       </div>
       <div class="TimeBox__Time-bottom">
-        <div>{{data.time}}</div>
+        <div>{{time}}</div>
       </div>
     </div>
   </div>
@@ -22,26 +22,39 @@
 export default {
   data () {
     return {
-      data: {
-        week: 'Monday',
-        day: '10',
-        month: 'Feb',
-        tag: 'PM',
-        time: '20:30'
-      }
+      realtimeDate: new Date()
     }
   },
-  props: {
-    // data: {
-    //   type: Object,
-    //   default: function () {
-    //     return {
-    //       week: 'Monday',
-    //       day: '10',
-    //       month: 'Feb'
-    //     }
-    //   }
-    // }
+  computed: {
+    itemArray: {
+      get () {
+        return this.realtimeDate.toString().split(' ')
+      }
+    },
+    week () {
+      return this.itemArray[0]
+    },
+    day () {
+      return this.itemArray[2]
+    },
+    month () {
+      return this.itemArray[1]
+    },
+    time () {
+      return this.itemArray[4].split(':').slice(0, 2).join(':')
+    },
+    tag () {
+      return this.time > '12' ? 'PM' : 'AM'
+    }
+  },
+  created () {
+    this.timer = setInterval(() => {
+      this.realtimeDate = new Date()
+    }, 1000)
+  },
+  beforeDestroy () {
+    clearInterval(this.timer)
+    console.log('timer interval cleared')
   }
 }
 </script>

@@ -1,8 +1,7 @@
 <template>
-    <div class="time-filter" v-if="showFilter">
-      <div>
-        <span>城市</span>
-        <el-select v-model="city" class="city" placeholder="请选择">
+  <div class="time-filter" v-if="showFilter">
+      <div class="time-filter-item">
+        <el-select size="small" v-model="city" class="city" placeholder="请选择">
           <el-option
             v-for="item in cityOptions"
             :key="item"
@@ -11,9 +10,8 @@
           </el-option>
         </el-select>
       </div>
-      <div class="time-filter" v-if="timeFilter">
-        <span>以</span>
-        <el-select class="timeType" @change="timeTypeChange" v-model="timeType" placeholder="请选择">
+      <div class="time-filter-item" v-show="showTypeFilter">
+        <el-select size="small" class="timeType" v-model="timeType" placeholder="类型">
           <el-option
             v-for="item in options"
             :key="item.value"
@@ -21,54 +19,59 @@
             :value="item.value">
           </el-option>
         </el-select>
-        <span>为单位查看</span>
-        <div v-show="timeType=='year'">
-          <el-date-picker
-            v-model="startTime"
-            align="right"
-            type="year"
-            placeholder="选择年">
-          </el-date-picker>
-          <span>--</span>
-          <el-date-picker
-            v-model="endTime"
-            align="right"
-            type="year"
-            placeholder="选择年">
-          </el-date-picker>
-        </div>
-        <div v-show="timeType=='month'">
-          <el-date-picker
-            v-model="startTime"
-            align="right"
-            type="month"
-            placeholder="选择月">
-        </el-date-picker>
-        <span>--</span>
+      </div>
+      <div class="time-filter-item" v-show="timeType=='year'">
         <el-date-picker
+          size="small"
+          v-model="startTime"
+          align="right"
+          type="year"
+          placeholder="选择年">
+        </el-date-picker>
+        <span>-</span>
+        <el-date-picker
+          size="small"
+          v-model="endTime"
+          align="right"
+          type="year"
+          placeholder="选择年">
+        </el-date-picker>
+      </div>
+      <div class="time-filter-item" v-show="timeType=='month'">
+        <el-date-picker
+          size="small"
+          v-model="startTime"
+          align="right"
+          type="month"
+          placeholder="选择月">
+        </el-date-picker>
+        <span>-</span>
+        <el-date-picker
+          size="small"
           v-model="endTime"
           align="right"
           type="month"
           placeholder="选择月">
         </el-date-picker>
       </div>
-      <div v-show="timeType=='date'">
+      <div class="time-filter-item" v-show="timeType=='date'">
         <el-date-picker
+          size="small"
           v-model="startTime"
           align="right"
           type="date"
           placeholder="选择日期">
         </el-date-picker>
-        <span>--</span>
+        <span>-</span>
         <el-date-picker
+          size="small"
           v-model="endTime"
           align="right"
           type="date"
           placeholder="选择日期">
         </el-date-picker>
       </div>
-    </div>
-</div>
+  </div>
 </template>
 <script>
 export default {
@@ -146,7 +149,7 @@ export default {
     showFilter () {
       return this.$route.path !== '/history'
     },
-    timeFilter () {
+    showTypeFilter () {
       return this.$route.path !== '/todayWeather'
     }
   },
@@ -157,9 +160,6 @@ export default {
     async getCityList () {
       const {data} = await this.axios.get(`${process.env.BASE_API}/api/cityList`, this.result)
       this.cityOptions = data.data
-    },
-    timeTypeChange: function () {
-      console.log(this.timeType)
     }
   }
 }
@@ -169,13 +169,17 @@ export default {
   height: 60px;
   display: flex;
   flex-flow: row nowrap;
-  justify-content: space-around;
+  justify-content: flex-start;
   align-items: center;
+  text-align: left;
+}
+.time-filter-item {
+  margin: 0 8px;
 }
 .city{
   width: 90px;
 }
 .timeType{
-  width: 60px;
+  width: 80px;
 }
 </style>
