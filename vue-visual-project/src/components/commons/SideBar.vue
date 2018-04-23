@@ -1,5 +1,4 @@
 <template>
-  <el-col :span="4">
   <el-menu :default-active="$route.path" class="el-menu-vertical-demo" :router="true">
       <el-menu-item index="/todayWeather">
           <i class="icon-jinri"></i>
@@ -34,7 +33,6 @@
           <span slot="title">个人中心</span>
       </el-menu-item> -->
     </el-menu>
-</el-col>
 </template>
 <script>
 export default {
@@ -49,7 +47,14 @@ export default {
 }
 </script>
 <style scoped>
-  a {
-   text-decoration:none;
-  }
+.el-menu {
+    /* position: absolute;
+    top: 61px;
+    bottom: 0px;
+    width: 200px; */
+    border: none;
+}
+a {
+    text-decoration:none;
+}
 </style>

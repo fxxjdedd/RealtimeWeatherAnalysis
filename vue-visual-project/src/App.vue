@@ -1,11 +1,22 @@
 <template>
   <div id="app">
-    <nav-bar>
-      <time-filter></time-filter>
-    </nav-bar>
-    <side-bar></side-bar>
-    <router-view></router-view>
+    <el-container>
+      <el-header>
+        <nav-bar>
+          <time-filter></time-filter>
+        </nav-bar>
+      </el-header>
+      <el-container>
+        <el-aside width="200px">
+          <side-bar></side-bar>
+        </el-aside>
+        <el-main>
+          <router-view></router-view>
+        </el-main>
+      </el-container>
+    </el-container>
   </div>
+
 </template>
 
 <script>
@@ -20,13 +31,22 @@ export default {
 }
 </script>
 
-<style>
+<style lang="scss">
 #app {
-  font-family: "Avenir", Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
 }
-  @import './styles/index.css';
+body {
+  margin: 0
+}
+.el-header {
+  margin: 0;
+  padding: 0;
+}
+.el-aside {
+  border-top: 1px solid #eee;
+  border-right: 1px solid #eee;
+}
 </style>
