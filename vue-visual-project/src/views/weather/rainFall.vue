@@ -36,10 +36,27 @@
   </el-container>
 </template>
 <script>
+import {getData} from '@/api'
 export default {
   created () {
     this.getList()
     this.getPie()
+  },
+  watch: {
+    result: {
+      deep: true,
+      immediate: true, // 立即执行
+      async handler () {
+        const {data} = await getData(this.result)
+        console.log(data)
+        // this.tableData = data
+      }
+    }
+  },
+  computed: {
+    result () {
+      return this.$store.state.filterData[this.$route.name]
+    }
   },
   methods: {
     getList: function () {
@@ -78,10 +95,4 @@ export default {
 }
 </script>
 <style scoped>
-.view-contain {
-  /* width: 70%; */
-  /* height: 100%; */
-  /* background: red; */
-  /* margin:0 auto; */
-}
 </style>

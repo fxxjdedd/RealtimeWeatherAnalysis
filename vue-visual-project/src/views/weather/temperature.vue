@@ -23,6 +23,7 @@
   </el-container>
 </template>
 <script>
+import {getData} from '@/api'
 export default {
   created () {
     this.getList()
@@ -32,19 +33,13 @@ export default {
     result: {
       deep: true,
       immediate: true, // 立即执行
-      handler: async function () {
-        const data = {}
-        data.startTime = this.result.startTime
-        data.endTime = this.result.endTime
-        data.city = this.result.city
-        // timeData(data.startTime, data.endTime, this.result.timeType)
-        // data.timeType = this.result.timeType
-        // const {data} = await this.axios.get('api', this.result)
-        // this.tableData = data.result
+      async handler () {
+        const {data} = await getData(this.result)
+        console.log(data)
+        // this.tableData = data
       }
     }
   },
-
   computed: {
     result () {
       return this.$store.state.filterData[this.$route.name]
@@ -87,7 +82,6 @@ export default {
     }
   }
 }
-
 </script>
 <style scoped>
 </style>
