@@ -12,5 +12,5 @@ export function timeData (startTime, endTime, timeType) {
   timeLong = Math.ceil(timeLong / (24 * 3600 * 1000 * timeMultiple))
   console.log(timeLong * timeMultiple, timeMultiple)
   return timeLong < 12 ? timeLong * timeMultiple
-                       : 12 * timeMultiple
+    : 12 * timeMultiple
 }

@@ -48,10 +48,11 @@ export default {
 </script>
 <style scoped>
 .el-menu {
-    position: absolute;
+    /* position: absolute;
     top: 61px;
     bottom: 0px;
-    width: 200px;
+    width: 200px; */
+    border: none;
 }
 a {
     text-decoration:none;
