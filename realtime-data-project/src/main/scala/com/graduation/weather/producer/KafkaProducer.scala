@@ -87,22 +87,7 @@ object KafkaProducer {
   }
 
   def main(args: Array[String]): Unit = {
-//    val promises = ArrayBuffer[Promise[Boolean]]()
-//    cities.foreach { city =>
-//      val newPromise = Promise[Boolean]
-//      promises += newPromise
-//      Future {
-//        logger.warn(s"###############$city")
-//        val result = runTask(city)
-//        newPromise.success(result)
-//      }
-//    }
-//    promises.foreach { pro =>
-//      Future {
-//        Await.result(pro.future, Inf)
-//      }
-//    }
-
+  
     val threadPool:ExecutorService=Executors.newFixedThreadPool(20)
     try {
       //提交5个线程
