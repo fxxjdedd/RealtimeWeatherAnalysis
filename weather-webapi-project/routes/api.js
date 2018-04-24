@@ -220,7 +220,16 @@ router.get('/get', async (request, response, next) => {
             errCode = 2;
             throw error;
         }
-        var queryRes = await lrangeAsync(redisListName, index, index + num - 1);
+        var queryRes;
+        if(index >= 0)
+        {
+            queryRes = await lrangeAsync(redisListName, index, index + num - 1);
+        }
+        else
+        {
+            queryRes = await lrangeAsync(redisListName, index - num + 1, index);
+        }
+       
 
         if (!queryRes) {
             errCode = 3;
