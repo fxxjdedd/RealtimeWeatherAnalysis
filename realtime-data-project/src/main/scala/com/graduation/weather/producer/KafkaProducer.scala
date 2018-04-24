@@ -68,6 +68,7 @@ object KafkaProducer {
             val newline = line.replace(city._1.replace("-", " "), city._2)
             producer.send(new ProducerRecord(topic, newline))
             logger.info(s"### sent kafka msg: $newline ###")
+            Thread.sleep(3000)
           }
         case Failure(f) =>
           logger.warn(s"### year: $year-$city 获取BufferdReader失败###");
@@ -91,7 +92,6 @@ object KafkaProducer {
     try {
       //提交5个线程
       cities.foreach { city =>
-        Thread.sleep(1000)
         threadPool.execute(new ThreadTask(city))
       }
 
