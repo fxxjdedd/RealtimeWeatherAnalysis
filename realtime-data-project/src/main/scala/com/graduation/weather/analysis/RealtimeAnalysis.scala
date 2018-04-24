@@ -8,7 +8,7 @@ import org.apache.spark.SparkConf
 import org.apache.spark.streaming.kafka.KafkaUtils
 import org.apache.spark.streaming.{Seconds, StreamingContext}
 import org.slf4j.LoggerFactory
-import redis.clients.jedis.JedisPool
+import redis.clients.jedis.{JedisPool, JedisPoolConfig}
 /**
   * Created by apple on 2018/2/19.
   */
@@ -92,5 +92,6 @@ object RealtimeAnalysis {
     }
     ssc.start()
     ssc.awaitTermination()
+
   }
 }

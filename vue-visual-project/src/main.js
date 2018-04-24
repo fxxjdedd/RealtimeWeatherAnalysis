@@ -17,9 +17,8 @@ Vue.config.productionTip = false
 Vue.prototype.$echarts = echarts
 Vue.prototype.axios = axios
 Vue.filter('F2C', function (value) {
-  console.log('FILTER:', value)
   value.rows = value.rows.map(r => {
-    return Object.assign({}, r, {TEMP: ((+r.TEMP - 32) / 1.8).toFixed(2)})
+    return Object.assign({}, r, {TEMP: ((+r.TEMP - 32) / 1.8).toFixed(1)})
   })
   return value
 })

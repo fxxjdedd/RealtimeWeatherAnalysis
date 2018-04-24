@@ -4,7 +4,8 @@ Vue.use(Vuex)
 const state = {
   filterData: {
     todayWeather: {
-      city: '济南'
+      city: '济南',
+      realtime: {}
     },
     temperature: {
       city: '济南',
