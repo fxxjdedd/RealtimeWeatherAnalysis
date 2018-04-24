@@ -7,6 +7,8 @@ export function getData (allData) {
   data.timeType = allData.timeType
   timeData(data.startTime, data.endTime, allData.timeType)
   return fetch({
-    url: ''
+    url: '',
+    method: 'get',
+    data: {}
   })
 }
