@@ -25,6 +25,7 @@
           size="small"
           v-model="startTime"
           align="right"
+          value-format="yyyy"
           type="year"
           placeholder="选择年">
         </el-date-picker>
@@ -33,6 +34,7 @@
           size="small"
           v-model="endTime"
           align="right"
+          value-format="yyyy"
           type="year"
           placeholder="选择年">
         </el-date-picker>
@@ -43,6 +45,7 @@
           v-model="startTime"
           align="right"
           type="month"
+          value-format="yyyyMM"
           placeholder="选择月">
         </el-date-picker>
         <span>-</span>
@@ -50,6 +53,7 @@
           size="small"
           v-model="endTime"
           align="right"
+          value-format="yyyyMM"
           type="month"
           placeholder="选择月">
         </el-date-picker>
@@ -60,6 +64,7 @@
           v-model="startTime"
           align="right"
           type="date"
+          value-format="yyyyMMdd"
           placeholder="选择日期">
         </el-date-picker>
         <span>-</span>
@@ -68,6 +73,7 @@
           v-model="endTime"
           align="right"
           type="date"
+          value-format="yyyyMMdd"
           placeholder="选择日期">
         </el-date-picker>
       </div>
@@ -78,7 +84,6 @@ export default {
   name: 'time-filter',
   data () {
     return {
-      week: '',
       cityOptions: [],
       options: [
         {
@@ -154,10 +159,28 @@ export default {
     }
   },
   created () {
-    this.getCityList()
+    this.getTime()
+    this.getCity()
   },
   methods: {
-    async getCityList () {
+    async getTime () {
+      const {data} = await this.axios.get(`${process.env.BASE_API}/api/get?index=-1&num=1`)
+      // let starttime
+      console.log(data)
+      const starttime = this.moment(data.data[0].date, 'YYYYMMDD').subtract(7, 'days').format('YYYYMMDD')
+      const endtime = data.data[0].date
+      this.$store.commit('updateFilterData', {
+        key: this.$route.name,
+        type: 'startTime',
+        value: starttime
+      })
+      this.$store.commit('updateFilterData', {
+        key: this.$route.name,
+        type: 'endTime',
+        value: endtime
+      })
+    },
+    async getCity () {
       const {data} = await this.axios.get(`${process.env.BASE_API}/api/cityList`, this.result)
       this.cityOptions = data.data
     }

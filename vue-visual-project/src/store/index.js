@@ -9,8 +9,8 @@ const state = {
     temperature: {
       city: '济南',
       timeType: 'date',
-      startTime: new Date().getTime() - 3600 * 24 * 1000 * 7,
-      endTime: new Date().getTime()
+      startTime: '',
+      endTime: ''
     },
     windSpeed: {
       city: '济南',

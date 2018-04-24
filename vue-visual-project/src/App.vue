@@ -11,7 +11,7 @@
           <side-bar></side-bar>
         </el-aside>
         <el-main>
-          <router-view></router-view>
+          <router-view :keep-alive="true"></router-view>
         </el-main>
       </el-container>
     </el-container>

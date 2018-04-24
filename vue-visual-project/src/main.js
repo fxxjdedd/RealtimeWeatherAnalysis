@@ -11,11 +11,13 @@ import axios from 'axios'
 // 引入echarts
 import echarts from 'echarts'
 import App from './App'
+import moment from 'moment'
 Vue.use(ElementUI)
 Vue.use(VCharts)
 Vue.config.productionTip = false
 Vue.prototype.$echarts = echarts
 Vue.prototype.axios = axios
+Vue.prototype.moment = moment
 
 /* eslint-disable no-new */
 new Vue({
