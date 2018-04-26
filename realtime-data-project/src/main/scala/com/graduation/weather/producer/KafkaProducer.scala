@@ -59,6 +59,7 @@ object KafkaProducer {
       val yearReg = """.*\/(.*)""".r
       val yearReg(year) = yearPath
       val reader = Try(HdfsUtils.readGZFile(fileSystem, s"/root/clouddata/$year/${city._1}-$year.op.gz"))
+      logger.info(s"读取url/root/clouddata/$year/${city._1}-$year.op.gz")
       reader match {
         case Success(r) =>
           // 一行是一天
