@@ -16,7 +16,16 @@ Vue.use(VCharts)
 Vue.config.productionTip = false
 Vue.prototype.$echarts = echarts
 Vue.prototype.axios = axios
-
+Vue.filter('F2C', function (value) {
+  value.rows = value.rows.map(r => {
+    return Object.assign({}, r, {
+      TEMP: ((+r.TEMP - 32) / 1.8).toFixed(1),
+      MAX: ((+r.MAX.replace('*', '') - 32) / 1.8).toFixed(1),
+      MIN: ((+r.MIN.replace('*', '') - 32) / 1.8).toFixed(1)
+    })
+  })
+  return value
+})
 /* eslint-disable no-new */
 new Vue({
   router,
