@@ -1,6 +1,7 @@
 package com.graduation.weather.analysis
 
 import com.google.gson.Gson
+import com.graduation.weather.utils.MyRedis
 import kafka.serializer.StringDecoder
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig
 import org.apache.kafka.clients.consumer.ConsumerConfig
@@ -8,7 +9,7 @@ import org.apache.spark.SparkConf
 import org.apache.spark.streaming.kafka.KafkaUtils
 import org.apache.spark.streaming.{Seconds, StreamingContext}
 import org.slf4j.LoggerFactory
-import redis.clients.jedis.{JedisPool, JedisPoolConfig}
+import redis.clients.jedis.{Jedis, JedisPool, JedisPoolConfig}
 /**
   * Created by apple on 2018/2/19.
   */
@@ -76,19 +77,30 @@ object RealtimeAnalysis {
       val splits = line._2.split(" ").filter { item =>
         item.length() > 0
       }
-      Some(Weather(splits(0), splits(1), splits(2), splits(3),
-        splits(4), splits(5), splits(6), splits(7), splits(8),
-        splits(9), splits(10), splits(11), splits(12), splits(13),
-        splits(14)))
+      Some(Weather(splits(0), splits(1), splits(2), splits(5),
+        splits(7), splits(9), splits(11), splits(12), splits(14),
+        splits(15), splits(16), splits(17), splits(18), splits(19),
+        splits(20)))
     }
+
     streamData.foreachRDD { rdd =>
-      rdd.foreach { data =>
-        val jedis = pool.getResource
-        jedis.select(1)
-        logger.info(s"### writing into redis with data: ${new Gson().toJson(data.get)}")
-        jedis.rpush(data.get.city, new Gson().toJson(data.get))
+
+      logger.info("第一层**********************")
+      rdd.foreachPartition(part => {
+        val jedis = MyRedis.pool.getResource
+//        下面这种写法会出现连接无法收回的情况, 难道是因为lazy pool的原因?
+//        还是序列化的问题呢?
+//        val jedis = pool.getResource
+        logger.info("第二层**********************")
+        part.foreach(data => {
+            logger.info("第三层**********************")
+            jedis.select(1)
+            logger.info(s"### writing into redis with data: ${new Gson().toJson(data.get)}")
+            jedis.rpush(data.get.city, new Gson().toJson(data.get))
+        })
+//        MyRedis.pool.returnResource(jedis)
         jedis.close()
-      }
+      })
     }
     ssc.start()
     ssc.awaitTermination()
