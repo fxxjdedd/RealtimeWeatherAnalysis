@@ -2,8 +2,10 @@
   <div id="app">
     <el-container>
       <el-header>
-        <nav-bar>
+        <nav-bar v-if="this.$route.path !== '/history'">
           <time-filter></time-filter>
+        </nav-bar>
+        <nav-bar v-else>
         </nav-bar>
       </el-header>
       <el-container>

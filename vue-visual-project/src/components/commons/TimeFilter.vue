@@ -1,5 +1,5 @@
 <template>
-  <div class="time-filter" v-if="showFilter">
+  <div class="time-filter">
       <div class="time-filter-item">
         <el-select size="small" v-model="city" class="city" placeholder="请选择">
           <el-option
@@ -151,9 +151,6 @@ export default {
         })
       }
     },
-    showFilter () {
-      return this.$route.path !== '/history'
-    },
     showTypeFilter () {
       return this.$route.path !== '/todayWeather'
     }
@@ -165,10 +162,8 @@ export default {
   methods: {
     async getTime () {
       const {data} = await this.axios.get(`${process.env.BASE_API}/api/get?index=-1&num=1`)
-      // let starttime
-      console.log(data)
-      const starttime = this.moment(data.data[0].date, 'YYYYMMDD').subtract(7, 'days').format('YYYYMMDD')
-      const endtime = data.data[0].date
+      const starttime = this.moment(data.data[0].date, 'YYYYMMDD').subtract(7, 'days').format('YYYYMMDD') || ''
+      const endtime = data.data[0].date || ''
       this.$store.commit('updateFilterData', {
         key: this.$route.name,
         type: 'startTime',

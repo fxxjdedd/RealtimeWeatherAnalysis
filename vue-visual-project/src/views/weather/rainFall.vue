@@ -37,10 +37,12 @@
 </template>
 <script>
 import {getData} from '@/api'
+import {mapGetters} from 'vuex'
 export default {
-  created () {
-    this.getList()
-    this.getPie()
+  data () {
+    return {
+      dableData: []
+    }
   },
   watch: {
     result: {
@@ -48,12 +50,15 @@ export default {
       immediate: true, // 立即执行
       async handler () {
         const {data} = await getData(this.result)
-        console.log(data)
-        // this.tableData = data
+        console.og(data)
+        this.tableData = data
       }
     }
   },
   computed: {
+    ...mapGetters([
+      'propertyMap'
+    ]),
     result () {
       return this.$store.state.filterData[this.$route.name]
     }

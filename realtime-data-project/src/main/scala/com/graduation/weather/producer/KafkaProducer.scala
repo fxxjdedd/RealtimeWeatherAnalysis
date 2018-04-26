@@ -68,7 +68,6 @@ object KafkaProducer {
             val newline = line.replace(city._1.replace("-", " "), city._2)
             producer.send(new ProducerRecord(topic, newline))
             logger.info(s"### sent kafka msg: $newline ###")
-            Thread.sleep(3000)
           }
         case Failure(f) =>
           logger.warn(s"### year: $year-$city 获取BufferdReader失败###");
@@ -87,26 +86,12 @@ object KafkaProducer {
   }
 
   def main(args: Array[String]): Unit = {
-//    val promises = ArrayBuffer[Promise[Boolean]]()
-//    cities.foreach { city =>
-//      val newPromise = Promise[Boolean]
-//      promises += newPromise
-//      Future {
-//        logger.warn(s"###############$city")
-//        val result = runTask(city)
-//        newPromise.success(result)
-//      }
-//    }
-//    promises.foreach { pro =>
-//      Future {
-//        Await.result(pro.future, Inf)
-//      }
-//    }
-
+  
     val threadPool:ExecutorService=Executors.newFixedThreadPool(20)
     try {
       //提交5个线程
       cities.foreach { city =>
+        Thread.sleep(1000)
         threadPool.execute(new ThreadTask(city))
       }
 

@@ -7,7 +7,7 @@
         <div>{{month}}</div>
       </div>
     </div>
-    <div :span="16" class="TimeBox__Time">
+    <div :span="16" class="TimeBox__Time" v-show="showTime">
       <div class="TimeBox__Time-top">
         <div>{{tag}}</div>
       </div>
@@ -22,13 +22,16 @@
 export default {
   data () {
     return {
-      realtimeDate: new Date()
+      realtime: new Date()
     }
+  },
+  props: {
+    showTime: Boolean
   },
   computed: {
     itemArray: {
       get () {
-        return this.realtimeDate.toString().split(' ')
+        return this.realtime.toString().split(' ')
       }
     },
     week () {
@@ -49,8 +52,14 @@ export default {
   },
   created () {
     this.timer = setInterval(() => {
-      this.realtimeDate = new Date()
-    }, 1000)
+      // 每隔3s增加一天
+      this.realtime = new Date(this.realtime.getTime() + 24 * 3600 * 1000)
+      this.$store.commit('updateFilterData', {
+        key: this.$route.name,
+        value: this.realtime,
+        type: 'realtime'
+      })
+    }, 3000)
   },
   beforeDestroy () {
     clearInterval(this.timer)
