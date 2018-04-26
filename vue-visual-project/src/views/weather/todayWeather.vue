@@ -21,19 +21,16 @@
       </el-col>
       <el-col :span="8">
         <el-card class="TodayWeather__Middle-card">
-
+          <span>温差</span>
+          <ve-line :data="middleDiff.data|F2C" :settings="middleDiff.settings"  height="250px"></ve-line>
         </el-card>
       </el-col>
       <el-col :span="8">
         <el-card class="TodayWeather__Middle-card">
-
+          <span>风速</span>
+          <wind-speed :data="lastData"></wind-speed>
         </el-card>
       </el-col>
-      <!-- <el-col :span="6">
-        <el-card class="TodayWeather__Middle-card">
-
-        </el-card>
-      </el-col> -->
     </el-row>
     <el-row :gutter="20" class="TodayWeather__Bottom">
       <el-col :span="16">
@@ -44,7 +41,7 @@
       <el-col :span="8" class="TodayWeather__Bottom__Right">
         <div>
           <el-card class="TodayWeather__Bottom__Right-card">
-
+            <weather-condition :data="lastData"></weather-condition>
           </el-card>
         </div>
         <div>
@@ -58,12 +55,14 @@
 </template>
 
 <script>
-import {TimeBox} from '@/components/commons'
+import {TimeBox, WindSpeed, WeatherCondition} from '@/components/commons'
 import {mapGetters} from 'vuex'
 import axios from 'axios'
 export default {
   components: {
-    TimeBox
+    TimeBox,
+    WindSpeed,
+    WeatherCondition
   },
   data () {
     return {
@@ -101,6 +100,9 @@ export default {
     curFilterData () {
       return this.filterData[this.$route.name]
     },
+    lastData () {
+      return this.realtimeData.slice(this.realtimeData.length - 1)
+    },
     realtimeData: {
       get () {
         return this.limitedData
@@ -129,11 +131,26 @@ export default {
       return {
         data: {
           columns: ['city', 'date', 'TEMP', 'DEWP', 'SLP', 'STP', 'VISIB', 'WDSP', 'MXSPD', 'GUST', 'MAX', 'MIN', 'PRCP', 'SNDP', 'FRSHTT'],
-          rows: this.realtimeData.slice(this.realtimeData.length - 1)
+          rows: this.lastData
         },
         settings: {
           dimension: 'date',
           metrics: 'TEMP'
+        }
+      }
+    },
+    middleDiff () {
+      return {
+        data: {
+          columns: ['city', 'date', 'TEMP', 'DEWP', 'SLP', 'STP', 'VISIB', 'WDSP', 'MXSPD', 'GUST', 'MAX', 'MIN', 'PRCP', 'SNDP', 'FRSHTT'],
+          rows: this.realtimeData.length <= 7 ? this.realtimeData
+            : this.realtimeData.slice(this.realtimeData.length - 7)
+        },
+        settings: {
+          metrics: ['MAX', 'MIN'],
+          dimension: ['date'],
+          labelMap: this.propertyMap,
+          area: true
         }
       }
     }
@@ -149,9 +166,8 @@ export default {
   &__Middle {
     &-card {
       height: 250px;
+      text-align: left;
       span {
-        position: absolute;
-        left: 35px;
         font-weight: bold;
       }
     }
