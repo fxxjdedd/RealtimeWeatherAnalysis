@@ -160,7 +160,36 @@ var queryDataByRange = async (startTime, endTime, keyName, interval) => {
     }
     return ret;
 }
+let queryLen = async(city)=>{
 
+    let redisClient;
+    let ret;
+    try {
+        
+        redisClient = redis.createClient(redisPort, redisIp);
+        const llenAsync = promisify(redisClient.llen).bind(redisClient);
+        const selectAsync = promisify(redisClient.select).bind(redisClient);
+        var res = await selectAsync("1");
+
+        if (res != "OK") {
+            throw res;
+        }
+        ret = await llenAsync(city);
+
+    } catch (error) {
+        throw error;
+    }finally{
+        if(redisClient)
+            redisClient.quit();
+    }
+    return ret;
+}
+
+/**
+ * 
+ * @param {*} startTime 
+ * @param {*} endTime 
+ */
 var queryCityList = async (startTime, endTime) => {
     var ret = [];
 
@@ -238,7 +267,11 @@ var queryByIndex = async (city, index, num) => {
     }
 }
 
-var sendJson = async (response, code, message, data) => {
+var sendJson = async (response, code, message, data,len) => {
+    if(data && !len)
+    {
+        len = data.length;
+    }
     response.writeHead(200, {
         "Content-Type": "application/json;charset=UTF-8",
         "Access-Control-Allow-Origin": "*"
@@ -247,6 +280,7 @@ var sendJson = async (response, code, message, data) => {
     response.end(JSON.stringify({
         code: code,
         message: message,
+        len:len,
         data: data
     }));
 }
@@ -364,6 +398,18 @@ router.get("/predict", async (request, response, next) => {
         sendJson(response, 2, error, null);
     }
 
+});
+
+router.get("/queryLen",async(request,response,next)=>{
+    try {
+        let city = request.query.city;
+
+        if(!city)
+            city = "济南";
+        sendJson(response, 0, "invoke ok!",null,await queryLen(city));
+    } catch (error) {
+        sendJson(response, 1, error, null);
+    }
 });
 
 module.exports = router;
