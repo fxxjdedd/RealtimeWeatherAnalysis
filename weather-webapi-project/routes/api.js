@@ -1,7 +1,10 @@
 var express = require('express');
 var router = express.Router();
 var redis = require('redis');
+var moment = require('moment');
 
+const ml = require("ml-regression");
+const SLR = ml.SLR; // 线性回归
 const redisIp = '101.201.66.163';
 const redisPort = '6379';
 
@@ -99,7 +102,7 @@ let insertValueSearch = async (value, isAllowRight, isAllowLeft, lindexAsync, re
  * @param {结束时间} endTime
  * @returns 返回的数据集 
  */
-var queryDataByRange = async (startTime, endTime, keyName,interval) => {
+var queryDataByRange = async (startTime, endTime, keyName, interval) => {
     var redisClient;
     var ret = [];
     try {
@@ -175,6 +178,56 @@ var queryCityList = async (startTime, endTime) => {
 
 }
 
+/**
+ * 根据下标返回数据
+ * @param {城市} city 
+ * @param {下标，为负表示从后面开始} index 
+ * @param {数量} num 
+ * @returns 返回的数据集
+ */
+var queryByIndex = async (city, index, num) => {
+    var client;
+    var errCode = 0;
+    var redisListName = city;
+    var dataArray = [];
+    try {
+        client = redis.createClient(redisPort, redisIp);
+
+        const lrangeAsync = promisify(client.lrange).bind(client);
+        const selectAsync = promisify(client.select).bind(client);
+
+        const error = await selectAsync("1");
+
+        if (error != "OK") {
+            errCode = 2;
+            throw error;
+        }
+        var queryRes;
+        if (index >= 0) {
+            queryRes = await lrangeAsync(redisListName, index, index + num - 1);
+        }
+        else {
+            queryRes = await lrangeAsync(redisListName, index - num + 1, index);
+        }
+
+        if (!queryRes) {
+            throw "lrange err:" + queryRes;
+        }
+        
+        for (var i in queryRes) {
+            var dataString = queryRes[i];
+            dataArray.push(JSON.parse(dataString));
+        }
+        return dataArray;
+    } catch (error) {
+       throw error;
+    }
+    finally {
+        // 关闭链接
+        if (client)
+            client.quit();
+    }
+}
 
 var sendJson = async (response, code, message, data) => {
     response.writeHead(200, {
@@ -192,68 +245,23 @@ var sendJson = async (response, code, message, data) => {
 
 router.get('/get', async (request, response, next) => {
 
-    var client;
     var errCode = 0;
+
     try {
-
-        var redisListName = request.query.city;
-
-        if (!redisListName)
-            redisListName = "济南";
-
         let index = parseInt(request.query.index);
         let num = parseInt(request.query.num);
+        let city = request.query.city;
+        if(!city)
+            city = "济南";
 
         if (isNaN(index) || isNaN(num)) {
             errCode = 1;
             throw "index or num args error";
         }
-
-        client = redis.createClient(redisPort, redisIp);
-
-        const lrangeAsync = promisify(client.lrange).bind(client);
-        const selectAsync = promisify(client.select).bind(client);
-
-        const error = await selectAsync("1");
-
-        if (error != "OK") {
-            errCode = 2;
-            throw error;
-        }
-        var queryRes;
-        if(index >= 0)
-        {
-            queryRes = await lrangeAsync(redisListName, index, index + num - 1);
-        }
-        else
-        {
-            queryRes = await lrangeAsync(redisListName, index - num + 1, index);
-        }
-       
-
-        if (!queryRes) {
-            errCode = 3;
-            throw "lrange err:" + queryRes;
-        }
-
-        var dataArray = [];
-
-        for (var i in queryRes) {
-            var dataString = queryRes[i];
-            dataArray.push(JSON.parse(dataString));
-        }
-
-        sendJson(response, 0, "invoke ok!", dataArray);
+        sendJson(response, 0, "invoke ok!", await queryByIndex(city, index, num));
     } catch (e) {
         sendJson(response, 1, e, null);
     }
-    finally {
-        // 关闭链接
-        if (client)
-            client.quit();
-    }
-
-
 });
 
 router.get('/query', async (request, response, next) => {
@@ -298,6 +306,55 @@ router.get('/cityList', async (request, response, next) => {
     } catch (error) {
         sendJson(response, 1, error, null);
     }
+});
+
+router.get("/predict", async (request, response, next) => {
+
+    let city = request.query.city;
+    if (!city)
+        city = "济南";
+
+    let recentData = await queryByIndex(city, -1, 30);
+    try {
+        if (!recentData || recentData.length <= 0) {
+            sendJson(response, 1, "nulldata", null);
+            return;
+        }
+
+        var x = [];
+        for (let i = 1; i <= recentData.length; ++i) {
+            x.push(i);
+        }
+
+        var dataObj = recentData[0];
+
+        var predictData = {};
+        predictData["city"] = city;
+
+        var lastTime = recentData[recentData.length - 1].date;
+
+        let tomorrow = moment(lastTime, "YYYYMMDD").add(1, "days").format("YYYYMMDD");
+
+        predictData["date"] = tomorrow;
+
+        for (let key in dataObj) {
+            if (key == "city" || key == "date")
+                continue;
+            let ys = [];
+            recentData.forEach((row) => {
+                ys.push(parseFloat(row[key]));
+            });
+
+            let regressionModel = new SLR(x, ys);
+            predictData[key] = regressionModel.predict(recentData.length + 1);
+        }
+
+        var retData = [predictData];
+        sendJson(response, 0, "invoke ok!", retData);
+    } catch (error) {
+        sendJson(response, 2, error, null);
+    }
+
 });
 
 module.exports = router;
