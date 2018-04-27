@@ -1,10 +1,19 @@
 import {fetch, timeData} from '@/utils'
+import moment from 'moment'
 export function getData (allData) {
+  console.log(allData.startTime)
   const data = {}
-  data.startTime = allData.startTime || '19700107'
-  data.endTime = allData.endTime || '19700107'
+  if (!allData.startTime) {
+    allData.startTime = '19700101'
+  }
+  if (!allData.endTime) {
+    allData.endTime = '19700107'
+  }
+  data.startTime = moment(allData.startTime, 'YYYYMMDD').format('YYYYMMDD')
+  data.endTime = moment(allData.endTime, 'YYYYMMDD').format('YYYYMMDD')
   data.city = allData.city || '济南'
   data.interval = timeData(data.startTime, data.endTime, allData.timeType) || 1
+
   return fetch({
     url: '/api/query',
     method: 'get',
