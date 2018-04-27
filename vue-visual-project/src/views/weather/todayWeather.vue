@@ -46,7 +46,7 @@
         </div>
         <div>
           <el-card class="TodayWeather__Bottom__Right-card">
-
+            <predict :data="predictData|F2C"></predict>
           </el-card>
         </div>
       </el-col>
@@ -55,18 +55,20 @@
 </template>
 
 <script>
-import {TimeBox, WindSpeed, WeatherCondition} from '@/components/commons'
+import {TimeBox, WindSpeed, WeatherCondition, Predict} from '@/components/commons'
 import {mapGetters} from 'vuex'
 import axios from 'axios'
 export default {
   components: {
     TimeBox,
     WindSpeed,
-    WeatherCondition
+    WeatherCondition,
+    Predict
   },
   data () {
     return {
-      limitedData: []
+      limitedData: [],
+      predictData: []
     }
   },
   watch: {
@@ -79,6 +81,11 @@ export default {
           params: Object.assign({}, this.curFilterData, {index: -1, num})
         })
         this.realtimeData = data.data[0] || {}
+
+        const resp = await axios.get('http://101.201.66.163:3000/api/predict', {
+          params: this.curFilterData
+        })
+        this.predictData = resp.data.data
       }
     },
     'curFilterData.city': {
@@ -89,6 +96,10 @@ export default {
           params: Object.assign({}, this.curFilterData, {index: -1, num})
         })
         this.limitedData = data.data
+        const resp = await axios.get('http://101.201.66.163:3000/api/predict', {
+          params: this.curFilterData
+        })
+        this.predictData = resp.data.data
       }
     }
   },
