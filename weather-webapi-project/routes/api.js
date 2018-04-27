@@ -35,6 +35,10 @@ let insertValueSearch = async (value, isAllowRight, isAllowLeft, lindexAsync, re
     try {
 
         //使用插值查找
+
+        //前四次使用插值查找，后面使用二分
+        let count = 4;
+
         while (1) {
 
             if (startIndex > endIndex) {
@@ -54,7 +58,7 @@ let insertValueSearch = async (value, isAllowRight, isAllowLeft, lindexAsync, re
             let dataEndTime = parseInt(endData.date);
 
             if (dataStartTime == dataEndTime) {
-                if (dataStartTime != value || dataStartTime != value)
+                if (dataStartTime != value)
                     break;
             }
 
@@ -70,12 +74,14 @@ let insertValueSearch = async (value, isAllowRight, isAllowLeft, lindexAsync, re
             isAllowRight = false;
 
             //let
-            partition = parseInt((value - dataStartTime) * (endIndex - startIndex + 1) / (dataEndTime - dataStartTime));
-            if (partition < startIndex)
-                partition = startIndex;
+            if(count >= 0)
+                partition = startIndex + parseInt((value - dataStartTime) * (endIndex - startIndex + 1) / (dataEndTime - dataStartTime));
+            else
+                partition = startIndex + parseInt( (endIndex - startIndex)*.5 );
+
             if (partition > endIndex)
                 partition = endIndex;
-
+            
             let partitionJson = JSON.parse(await lindexAsync(redisKeyName, partition));
             let partitionValue = parseInt(partitionJson.date);
 
@@ -88,7 +94,7 @@ let insertValueSearch = async (value, isAllowRight, isAllowLeft, lindexAsync, re
                 findIndex = partition;
                 break;
             }
-
+            --count;
         }
     } catch (error) {
 
@@ -125,14 +131,15 @@ var queryDataByRange = async (startTime, endTime, keyName, interval) => {
         if (isNaN(count) || count <= 0) {
             throw "count == 0";
         }
-
+ 
         var startIndex = await insertValueSearch(startTime, false, true, lindexAsync, keyName, count);
         if (startIndex == -1)
             throw "no find start in the range";
-
+   
         var endIndex = await insertValueSearch(endTime, true, false, lindexAsync, keyName, count);
         if (endIndex == -1)
             throw "no find end in the range";
+
         if (isNaN(interval)) {
             ret = await lrangeAsync(keyName, startIndex, endIndex);
         }
