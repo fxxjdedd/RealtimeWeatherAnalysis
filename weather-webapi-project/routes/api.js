@@ -31,12 +31,14 @@ let insertValueSearch = async (value, isAllowRight, isAllowLeft, lindexAsync, re
     var startIndex = 0;
     var endIndex = count - 1;
     var findIndex = -1;
+    let partition;
     try {
 
         //使用插值查找
         while (1) {
 
             if (startIndex > endIndex) {
+                
                 break;
             }
 
@@ -44,7 +46,7 @@ let insertValueSearch = async (value, isAllowRight, isAllowLeft, lindexAsync, re
             let endData = await lindexAsync(redisKeyName, endIndex);
             if (!startData || !endData)
                 break;
-
+``
             startData = JSON.parse(startData);
             endData = JSON.parse(endData);
 
@@ -68,7 +70,7 @@ let insertValueSearch = async (value, isAllowRight, isAllowLeft, lindexAsync, re
             isAllowRight = false;
 
             //let
-            let partition = parseInt((value - dataStartTime) * (endIndex - startIndex + 1) / (dataEndTime - dataStartTime));
+            partition = parseInt((value - dataStartTime) * (endIndex - startIndex + 1) / (dataEndTime - dataStartTime));
             if (partition < startIndex)
                 partition = startIndex;
             if (partition > endIndex)
@@ -136,7 +138,7 @@ var queryDataByRange = async (startTime, endTime, keyName, interval) => {
         }
         else {
 
-            for (let i = startIndex; i < endIndex; i += interval) {
+            for (let i = startIndex; i <= endIndex; i += interval) {
                 let singleRes = await lindexAsync(keyName, i);
                 ret.push(singleRes);
             }
@@ -281,9 +283,9 @@ router.get('/query', async (request, response, next) => {
 
 
         if (isNaN(startTime) || startTime < 0)
-            startTime = 0;
+            throw "startTime isNull";
         if (isNaN(endTime))
-            endTime = 20190101;
+            throw "endTime isNull";
 
         var dataArray = [];
         let queryRes = await queryDataByRange(startTime, endTime, city, interval)
