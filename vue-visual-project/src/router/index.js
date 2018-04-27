@@ -2,7 +2,7 @@ import Vue from 'vue'
 import Router from 'vue-router'
 // import nav from '@/components/nav'
 // import {chart1} from '@/views/demo'
-import {todayWeather, temperature, windSpeed, airQuality, rainFall, airPressure} from '@/views/weather'
+import {todayWeather, temperature, windSpeed, airQuality, rainFall, airPressure, history} from '@/views/weather'
 Vue.use(Router)
 
 export default new Router({
@@ -42,19 +42,11 @@ export default new Router({
       component: airPressure
     },
     {
-      path: '/3',
-      component: windSpeed
+      path: '/history',
+      component: history
     },
     {
       path: '/4',
-      component: windSpeed
-    },
-    {
-      path: '/5',
-      component: windSpeed
-    },
-    {
-      path: '/6',
       component: windSpeed
     }
   ]
