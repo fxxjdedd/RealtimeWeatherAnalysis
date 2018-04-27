@@ -50,11 +50,11 @@ export default {
       }
     },
     windSpeedStyle () {
-      const scale = scaleLinear().domain([0, 10])
-        .range([5, 0])
+      const scale = scaleLinear().domain([0, 12])
+        .range([6, 0])
       console.log(this.data)
-      console.log(`rotating ${scale(this.windSpeed)} linear infinite`)
-      return { animation: `rotating ${scale(this.windSpeed)}s linear infinite` }
+      console.log(`rotating ${scale(this.windLevel)} linear infinite`)
+      return { animation: `rotating ${scale(this.windLevel)}s linear infinite` }
     }
   }
 }
