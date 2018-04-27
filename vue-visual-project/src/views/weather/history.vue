@@ -2,28 +2,33 @@
   <el-container>
     <el-main>
       <el-row>
-        <el-col :span="8">
+        <el-col :span="12">
             <div>
                 <ve-scatter :data="windSpeedData.data"
                             :grid="windSpeedData.grid"
                             :visual-map="windSpeedData.map"
                             :settings="windSpeedData.settings"
                             :title="windSpeedData.title"
+                            :legend-visible="false"
+                            :events="windSpeedData.event"
                             height="300px"></ve-scatter>
             </div>
         </el-col>
-        <el-col :span="8">
+        <el-col :span="12">
                 <ve-line :data="airPressureData.data"
-                         :settings="airPressureData.ettings1"
+                         :settings="airPressureData.settings"
                          :title="airPressureData.title"
+                         :legend-visible="false" 
+                         :events="airPressureData.event"
                          height="300px"></ve-line>
         </el-col>
-        <el-col :span="8">
-                <ve-pie :data="airQualityData.data"
-                        :settings="airQualityData.settings1"
+        <!-- <el-col :span="8">
+                <ve-line :data="airQualityData.data"
+                        :settings="airQualityData.settings"
                         :title="airQualityData.title"
-                        height="300px"></ve-pie>
-        </el-col>
+                        :legend-visible="false"
+                        height="300px"></ve-line>
+        </el-col> -->
     </el-row>
     <el-row>
         <el-col :span="12">
@@ -31,14 +36,17 @@
                 <ve-line :data="temperatureData.data"
                          :settings="temperatureData.settings"
                          :title="temperatureData.title"
-                         height="500px"></ve-line>
+                         :events="temperatureData.event"
+                         height="400px"></ve-line>
             </div>
         </el-col>
         <el-col :span="12">
                 <ve-histogram :data="rainFallData.data"
                               :settings="rainFallData.settings"
                               :title="rainFallData.title"
-                              height="500px"></ve-histogram>
+                              :legend-visible="false"
+                              :events="rainFallData.event"
+                              height="400px"></ve-histogram>
         </el-col>
     </el-row>
     </el-main>
@@ -48,6 +56,7 @@
 <script>
 import {getData} from '@/api'
 import 'echarts/lib/component/title'
+import {mapGetters} from 'vuex'
 export default {
   data () {
     return {
@@ -55,35 +64,18 @@ export default {
       airPressure: [],
       airQuality: [],
       temperature: [],
-      rainFall: []
+      rainFall: [],
+      windSpeedData: {},
+      airPressureData: {},
+      airQualityData: {},
+      temperatureData: {},
+      rainFallData: {}
     }
   },
   computed: {
-    windSpeedData () {
-      return {
-
-      }
-    },
-    airPressureData () {
-      return {
-
-      }
-    },
-    airQualityData () {
-      return {
-
-      }
-    },
-    temperatureData () {
-      return {
-
-      }
-    },
-    rainFallData () {
-      return {
-
-      }
-    }
+    ...mapGetters([
+      'propertyMap'
+    ])
   },
   created () {
     this.allData()
@@ -97,54 +89,135 @@ export default {
           this[key] = data
         }
       }
+      this.getWindSpeed()
+      this.getAirPressure()
+      this.getTemperature()
+      this.getRainFall()
     },
-    getList: function () {
-      this.chartData = {
-        columns: ['日期', '余额', '数量', '年龄'],
-        rows: {
-          '上海': [
-            { '日期': '1-1', '余额': 123, '年龄': 3, '数量': 1244 },
-            { '日期': '1-2', '余额': 1223, '年龄': 6, '数量': 2344 },
-            { '日期': '1-3', '余额': 7123, '年龄': 9, '数量': 3245 },
-            { '日期': '1-4', '余额': 4123, '年龄': 12, '数量': 4355 },
-            { '日期': '1-5', '余额': 3123, '年龄': 15, '数量': 4564 },
-            { '日期': '1-6', '余额': 2323, '年龄': 20, '数量': 6537 }
-          ]
+    getWindSpeed () {
+      const self  = this
+      this.windSpeedData = {
+        data: {
+          columns: ['city', 'date', 'TEMP', 'DEWP', 'SLP', 'STP', 'VISIB', 'WDSP', 'MXSPD', 'GUST', 'MAX', 'MIN', 'PRCP', 'SNDP', 'FRSHTT'],
+          rows: this.windSpeed
+        },
+        map: {
+          type: 'continuous',
+          dimension: 3,
+          min: 0,
+          max: 10,
+          inRange: {
+            color: ['#19d4ae', '#5ab1ef']
+          },
+          bottom: 60
+        },
+        settings: {
+          metrics: ['WDSP'],
+          dimension: ['date'],
+          area: true,
+          labelMap: this.propertyMap
+        },
+        grid: {
+          left: 50
+        },
+        title: {text: '风速'},
+        event: {
+          click: function(){
+            // self.$router.push({name: '/windSpeed'})
+            // self.detail("/windSpeed")
+            // console.log(self.windSpeed,self.path)
+            // self.$store.dispatch("/windSpeed")
+            // self.path = '/windSpeed'
+            self.detail("windSpeed")
+          }
         }
       }
-      this.chartSettings = {}
-      this.title ={text: '降水'}
-
-      this.chartVisualMap = {
-        type: 'continuous',
-        dimension: 3,
-        min: 0,
-        max: 30,
-        inRange: {
-          color: ['#19d4ae', '#5ab1ef']
+    },
+    getAirPressure () {
+      const self = this
+      this.airPressureData = {
+        data: {
+          columns: ['city', 'date', 'TEMP', 'DEWP', 'SLP', 'STP', 'VISIB', 'WDSP', 'MXSPD', 'GUST', 'MAX', 'MIN', 'PRCP', 'SNDP', 'FRSHTT'],
+          rows: this.airPressure
         },
-        bottom: 50
-      }
-      this.chartGrid = {
-        left: 30
+        settings: {
+          metrics: ['SLP'],
+          dimension: ['date'],
+          area: true,
+          labelMap: this.propertyMap
+        },
+        title: {text: '气压'},
+        event: {
+          click: function(){
+            self.detail("airPressure")
+          }
+        }
       }
     },
-    getPie: function () {
-      this.chartData1 = {
-        columns: ['日期', '成本', '利润'],
-        rows: [
-          { '日期': '1月1号', '成本': 123, '利润': 3 },
-          { '日期': '1月2号', '成本': 1223, '利润': 6 },
-          { '日期': '1月3号', '成本': 2123, '利润': 90 },
-          { '日期': '1月4号', '成本': 4123, '利润': 12 },
-          { '日期': '1月5号', '成本': 3123, '利润': 15 },
-          { '日期': '1月6号', '成本': 7123, '利润': 20 }
-        ]
+    getAirQuality () {
+      const self = this
+      this.airQualityData = {
+        data: {
+          columns: ['city', 'date', 'TEMP', 'DEWP', 'SLP', 'STP', 'VISIB', 'WDSP', 'MXSPD', 'GUST', 'MAX', 'MIN', 'PRCP', 'SNDP', 'FRSHTT'],
+          rows: this.airQuality
+        },
+        settings: {
+          metrics: ['VISIB'],
+          // FRSHTT  天气情况
+          dimension: ['date'],
+          labelMap: this.propertyMap
+        },
+        title: {text: '空气质量'},
+        event: {
+          click: function(){
+            self.detail("airQuality")
+          }
+        }
       }
-      this.chartSettings1 = {
-        dimension: '成本',
-        metrics: '利润'
+    },
+    getTemperature () {
+      const self = this
+      this.temperatureData = {
+        data: {
+          columns: ['city', 'date', 'TEMP', 'DEWP', 'SLP', 'STP', 'VISIB', 'WDSP', 'MXSPD', 'GUST', 'MAX', 'MIN', 'PRCP', 'SNDP', 'FRSHTT'],
+          rows: this.temperature
+        },
+        settings: {
+          metrics: ['TEMP'],
+          dimension: ['date'],
+          labelMap: this.propertyMap
+        },
+        title: {text: '气温'},
+        event: {
+          click: function(){
+            self.detail("temperature")
+          }
+        }
       }
+    },
+    getRainFall () {
+      const self = this
+      this.rainFallData = {
+        data: {
+          columns: ['city', 'date', 'TEMP', 'DEWP', 'SLP', 'STP', 'VISIB', 'WDSP', 'MXSPD', 'GUST', 'MAX', 'MIN', 'PRCP', 'SNDP', 'FRSHTT'],
+          rows: this.rainFall
+        },
+        settings: {
+          metrics: ['DEWP'],
+          dimension: ['date'],
+          labelMap: this.propertyMap
+        },
+        title: {text: '降水'},
+        event: {
+          click: function(){
+            self.detail("rainFall")
+          }
+        }
+      }
+    },
+    detail(data) {
+      this.$router.push({name: '/rainFall'})
+      alert(data)
     }
   }
 }

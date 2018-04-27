@@ -162,8 +162,8 @@ export default {
   methods: {
     async getTime () {
       const {data} = await this.axios.get(`${process.env.BASE_API}/api/get?index=-1&num=1`)
-      const starttime = this.moment(data.data[0].date, 'YYYYMMDD').subtract(7, 'days').format('YYYYMMDD') || ''
-      const endtime = data.data[0].date || ''
+      const starttime = this.moment(data.data[0].date, 'YYYYMMDD').subtract(7, 'days').format('YYYYMMDD')
+      const endtime = data.data[0].date
       this.$store.commit('updateFilterData', {
         key: this.$route.name,
         type: 'startTime',

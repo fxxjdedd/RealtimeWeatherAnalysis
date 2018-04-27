@@ -14,24 +14,24 @@
       </el-menu-item>
       <el-menu-item index="/rainFall">
           <i class="icon-xiayu"></i>
-          <span slot="title">平均降水</span>
+          <span slot="title">降水量</span>
       </el-menu-item>
       <el-menu-item index="/airPressure">
           <i class="icon-daqiyali"></i>
           <span slot="title">气压气压</span>
       </el-menu-item>
-      <el-menu-item index="/airQuality">
+      <!-- <el-menu-item index="/airQuality">
           <i class="icon-kongqizhiliang"></i>
           <span slot="title">空气质量</span>
-      </el-menu-item>
+      </el-menu-item> -->
       <el-menu-item index="/history">
           <i class="icon-3lishi"></i>
           <span slot="title">历时数据</span>
       </el-menu-item>
-      <!-- <el-menu-item index="/personal">
-          <i class="icon-geren11"></i>
-          <span slot="title">个人中心</span>
-      </el-menu-item> -->
+      <el-menu-item index="/quit">
+          <i class="el-icon-edit"></i>
+          <span slot="title">退出登录</span>
+      </el-menu-item>
     </el-menu>
 </template>
 <script>

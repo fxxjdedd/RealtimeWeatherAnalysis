@@ -15,11 +15,11 @@ export function timeData (startTime, endTime, timeType) {
   }
   let timeLong = endTime - startTime
   if (timeLong < 12) {
-    return timeLong * timeMultiple
+    return timeMultiple
   } else if (timeLong < 24) {
-    return parseInt(timeLong / 2) * timeMultiple
+    return 2 * timeMultiple
   } else if (timeLong < 36) {
-    return parseInt(timeLong / 3) * timeMultiple
+    return 3 * timeMultiple
   } else {
     return parseInt(timeLong / 10) * timeMultiple
   }

@@ -46,7 +46,7 @@ export default new Router({
       component: history
     },
     {
-      path: '/4',
+      path: '/quit',
       component: windSpeed
     }
   ]
