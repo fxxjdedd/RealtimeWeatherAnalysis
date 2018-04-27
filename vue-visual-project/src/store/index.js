@@ -7,35 +7,40 @@ const state = {
       city: '济南',
       realtime: {}
     },
-    temperature: {
+    analyze: {
       city: '济南',
       timeType: 'date',
       startTime: '',
-      endTime: ''
+      endTime: '',
+      chart: 'temperature'
     },
     windSpeed: {
       city: '济南',
       timeType: 'date',
       startTime: '',
-      endTime: ''
+      endTime: '',
+      chart: 'temperature'
     },
     rainFall: {
       city: '济南',
       timeType: 'date',
       startTime: '',
-      endTime: ''
+      endTime: '',
+      chart: 'temperature'
     },
     airPressure: {
       city: '济南',
       timeType: 'date',
       startTime: '',
-      endTime: ''
+      endTime: '',
+      chart: 'temperature'
     },
     airQuality: {
       city: '济南',
       timeType: 'date',
       startTime: '',
-      endTime: ''
+      endTime: '',
+      chart: 'temperature'
     }
   },
   propertyMap: {

@@ -1,6 +1,16 @@
 <template>
   <div class="time-filter">
       <div class="time-filter-item">
+        <el-select size="small" v-model="chart" class="chart" placeholder="请选择" v-if="show">
+          <el-option
+            v-for="item in chartOptions"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value">
+          </el-option>
+        </el-select>
+      </div>
+      <div class="time-filter-item">
         <el-select size="small" v-model="city" class="city" placeholder="请选择">
           <el-option
             v-for="item in cityOptions"
@@ -10,7 +20,7 @@
           </el-option>
         </el-select>
       </div>
-      <div class="time-filter-item" v-show="showTypeFilter">
+      <div class="time-filter-item" v-if="show">
         <el-select size="small" class="timeType" v-model="timeType" placeholder="类型">
           <el-option
             v-for="item in options"
@@ -20,59 +30,12 @@
           </el-option>
         </el-select>
       </div>
-      <div class="time-filter-item" v-show="timeType=='year'">
+      <div class="time-filter-item" v-if="show">
         <el-date-picker
           size="small"
-          v-model="startTime"
+          v-model="date"
           align="right"
-          value-format="yyyy"
-          type="year"
-          placeholder="选择年">
-        </el-date-picker>
-        <span>-</span>
-        <el-date-picker
-          size="small"
-          v-model="endTime"
-          align="right"
-          value-format="yyyy"
-          type="year"
-          placeholder="选择年">
-        </el-date-picker>
-      </div>
-      <div class="time-filter-item" v-show="timeType=='month'">
-        <el-date-picker
-          size="small"
-          v-model="startTime"
-          align="right"
-          type="month"
-          value-format="yyyyMM"
-          placeholder="选择月">
-        </el-date-picker>
-        <span>-</span>
-        <el-date-picker
-          size="small"
-          v-model="endTime"
-          align="right"
-          value-format="yyyyMM"
-          type="month"
-          placeholder="选择月">
-        </el-date-picker>
-      </div>
-      <div class="time-filter-item" v-show="timeType=='date'">
-        <el-date-picker
-          size="small"
-          v-model="startTime"
-          align="right"
-          type="date"
-          value-format="yyyyMMdd"
-          placeholder="选择日期">
-        </el-date-picker>
-        <span>-</span>
-        <el-date-picker
-          size="small"
-          v-model="endTime"
-          align="right"
-          type="date"
+          type="daterange"
           value-format="yyyyMMdd"
           placeholder="选择日期">
         </el-date-picker>
@@ -85,6 +48,12 @@ export default {
   data () {
     return {
       cityOptions: [],
+      chartOptions: [
+        {label: '温度', value: 'temperature'},
+        {label: '风速', value: 'windSpeed'},
+        {label: '降水', value: 'rainFall'},
+        {label: '气压', value: 'airPressure'}
+      ],
       options: [
         {
           value: 'year',
@@ -98,11 +67,22 @@ export default {
           value: 'date',
           label: '天'
         }
-
       ]
     }
   },
   computed: {
+    chart: {
+      get () {
+        return this.$store.state.filterData[this.$route.name].chart
+      },
+      set (value) {
+        this.$store.commit('updateFilterData', {
+          key: this.$route.name,
+          value,
+          type: 'chart'
+        })
+      }
+    },
     city: {
       get () {
         return this.$store.state.filterData[this.$route.name].city
@@ -127,37 +107,38 @@ export default {
         })
       }
     },
-    startTime: {
+    date: {
       get () {
-        return this.$store.state.filterData[this.$route.name].startTime
+        return [
+          this.$store.state.filterData[this.$route.name].startTime,
+          this.$store.state.filterData[this.$route.name].endTime
+        ]
       },
       set (value) {
         this.$store.commit('updateFilterData', {
           key: this.$route.name,
-          value,
+          value: value[0],
           type: 'startTime'
         })
-      }
-    },
-    endTime: {
-      get () {
-        return this.$store.state.filterData[this.$route.name].endTime
-      },
-      set (value) {
         this.$store.commit('updateFilterData', {
           key: this.$route.name,
-          value,
+          value: value[1],
           type: 'endTime'
         })
       }
     },
-    showTypeFilter () {
+    show () {
       return this.$route.path !== '/todayWeather'
     }
   },
   created () {
     this.getTime()
     this.getCity()
+  },
+  watch: {
+    '$route.name' () {
+      this.getTime()
+    }
   },
   methods: {
     async getTime () {
@@ -195,6 +176,9 @@ export default {
   margin: 0 8px;
 }
 .city{
+  width: 90px;
+}
+.chart {
   width: 90px;
 }
 .timeType{
