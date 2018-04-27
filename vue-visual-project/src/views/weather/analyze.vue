@@ -1,5 +1,5 @@
 <template>
-  <div class="Temperature">
+  <div class="Analyze">
     <el-row>
       <el-col :span="24">
         <line-chart
@@ -11,7 +11,7 @@
       </el-col>
     </el-row>
     <el-row>
-      <el-col class="Temperature__Box" :span="8" style="height: 600px">
+      <el-col class="Analyze__Box" :span="8" style="height: 600px">
         <span>同比表</span>
         <el-table
           :data="mergedData | F2C"
@@ -22,21 +22,20 @@
           </el-table-column>
           <el-table-column
             label="温度 °C"
-            prop="TEMP">
+            :prop="keyProp.key">
           </el-table-column>
           <el-table-column
-            label="同比去年 °C"
-            prop="LAST_TEMP">
+            label="同比去年 °C">
             <template slot-scope="scope">
-              <span style="color: green" v-if="scope.row.LAST_TEMP>scope.row.TEMP">{{scope.row.LAST_TEMP}}</span>
-              <span style="color: red" v-else>{{scope.row.LAST_TEMP}}</span>
+              <span style="color: green" v-if="scope.row[`LAST_${keyProp.key}`]>scope.row[`${keyProp.key}`]">{{scope.row[`LAST_${keyProp.key}`]}}</span>
+              <span style="color: red" v-else>{{scope.row[`LAST_${keyProp.key}`]}}</span>
             </template>
           </el-table-column>
         </el-table>
 
       </el-col>
-      <el-col class="Temperature__Box" :span="8">
-        <span>温度占比</span>
+      <el-col class="Analyze__Box" :span="8">
+        <span>{{pieTitle}}占比</span>
         <ve-pie
           :data="leftPieData.data"
           :settings="leftPieData.settings"
@@ -44,7 +43,7 @@
           height="350px">
         </ve-pie>
       </el-col>
-      <el-col class="Temperature__Box" :span="8" style="height: 600px">
+      <el-col class="Analyze__Box" :span="8" style="height: 600px">
         <span>天气情况</span>
         <condition-table :data="rigthConditionData" style="heigth: 600px"></condition-table>
       </el-col>
@@ -68,7 +67,35 @@ export default {
       tableData: [],
       backData: [],
       yoyData: [],
-      range: []
+      range: [],
+      conditionMap: {
+        '000000': '晴朗',
+        '000001': '雾天',
+        '000010': '雨天',
+        '000100': '下雪',
+        '001000': '冰雹',
+        '010000': '打雷',
+        '100000': '龙卷风',
+        '110000': '台风'
+      },
+      keyMap: {
+        temperature: {
+          key: 'TEMP',
+          values: ['TEMP', 'MAX', 'MIN']
+        },
+        windSpeed: {
+          key: 'WDSP',
+          values: ['WDSP', 'MXSPD']
+        },
+        rainFall: {
+          key: 'PRCP',
+          values: ['PRCP', 'SNDP']
+        },
+        airPressure: {
+          key: 'SLP',
+          values: ['SLP', 'STP']
+        }
+      }
     }
   },
   watch: {
@@ -76,19 +103,13 @@ export default {
       deep: true,
       async handler () {
         if (!this.request) return
-        const params = Object.assign({}, this.result)
-        const {data} = await this.request(params, 'http://101.201.66.163:3000/api/query')
-        this.tableData = data.data || []
-        this.range = [0, this.tableData.length]
+        await this.initTotalData()
       }
     },
     range: {
       deep: true,
       async handler () {
-        const params = Object.assign({}, this.result, {
-          startTime: this.yoyDateRange[0],
-          endTime: this.yoyDateRange[1]
-        })
+        const params = this.analyzeParams
         const {data} = await this.request(params, 'http://101.201.66.163:3000/api/query')
         this.yoyData = data.data || []
       }
@@ -96,11 +117,9 @@ export default {
   },
   async created () {
     this.request = getDebouncedRequest()
-    if (!this.request) return
-    const params = Object.assign({}, this.result)
-    const {data} = await this.request(params, 'http://101.201.66.163:3000/api/query')
-    this.tableData = data.data || []
-    this.range = [0, this.tableData.length]
+    setTimeout(async () => {
+      await this.initTotalData()
+    }, 1000)
   },
   computed: {
     ...mapGetters([
@@ -109,6 +128,40 @@ export default {
     result () {
       return this.$store.state.filterData[this.$route.name]
     },
+    totalParams () {
+      return Object.assign({}, this.result, {interval: this.interval})
+    },
+    analyzeParams () {
+      return Object.assign({}, this.result, {
+        startTime: this.yoyDateRange[0],
+        endTime: this.yoyDateRange[1],
+        interval: this.interval
+      })
+    },
+    keyProp () {
+      return this.keyMap[this.result.chart]
+    },
+    interval () {
+      if (this.result.timeType === 'date') {
+        return 1
+      } else if (this.result.timeType === 'month') {
+        return 30
+      } else {
+        return 365
+      }
+    },
+    pieTitle () {
+      const key = this.keyProp.key
+      if (key === 'TEMP') {
+        return '温度'
+      } else if (key === 'WDSP') {
+        return '风速'
+      } else if (key === 'PRCP') {
+        return '降水'
+      } else {
+        return '气压'
+      }
+    },
     lineChart () {
       return {
         data: {
@@ -116,7 +169,7 @@ export default {
           rows: this.tableData
         },
         settings: {
-          metrics: ['TEMP', 'MAX', 'MIN'],
+          metrics: this.keyProp.values,
           dimension: ['date'],
           area: true,
           labelMap: this.propertyMap
@@ -127,6 +180,7 @@ export default {
       return this.tableData.slice(this.range[0], this.range[1])
     },
     dateRange () {
+      if (!this.analyzeData.length) return []
       return [this.analyzeData[0].date, this.analyzeData[this.analyzeData.length - 1].date]
     },
     yoyDateRange () {
@@ -137,7 +191,10 @@ export default {
     mergedData () {
       return this.analyzeData.map((d, i) => {
         if (!this.yoyData || !this.yoyData[i]) return d
-        return Object.assign({}, d, {LAST_TEMP: this.yoyData[i].TEMP})
+        const lastData = {}
+        lastData['LAST_' + this.keyProp.key] = this.yoyData[i][this.keyProp.key]
+        console.log(lastData)
+        return Object.assign({}, d, lastData)
       })
     },
     leftPieData () {
@@ -160,14 +217,27 @@ export default {
     }
   },
   methods: {
-
+    async initTotalData () {
+      const params = this.totalParams
+      console.log(params)
+      const {data} = await this.request(params, 'http://101.201.66.163:3000/api/query')
+      console.log('请求第')
+      this.tableData = data.data || []
+      this.range = [0, this.tableData.length]
+    },
     getCountData (arr) {
       const hash = arr.reduce((item, next) => {
-        let floorTemp = ((parseFloat(next.TEMP) - 32) / 1.8).toFixed(0) + '°C'
-        if (!item[floorTemp]) {
-          item[floorTemp] = 0
+        let key
+        if (this.keyProp.key === 'TEMP') {
+          key = ((parseFloat(next.TEMP) - 32) / 1.8).toFixed(0) + '°C'
+        } else {
+          key = parseFloat(next[this.keyProp.key]).toFixed(0)
         }
-        item[floorTemp] += 1
+        console.log(key)
+        if (!item[key]) {
+          item[key] = 0
+        }
+        item[key] += 1
         return item
       }, {})
       const result = []
@@ -189,20 +259,11 @@ export default {
         return item
       }, {})
       const result = []
-      const conditionMap = {
-        '000000': '晴朗',
-        '000001': '雾天',
-        '000010': '雨天',
-        '000100': '下雪',
-        '001000': '冰雹',
-        '010000': '打雷',
-        '100000': '龙卷风',
-        '110000': '台风'
-      }
+
       for (const key in hash) {
         result.push({
           key: key,
-          msg: conditionMap[key],
+          msg: this.conditionMap[key],
           value: hash[key]
         })
       }
@@ -212,7 +273,7 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
-.Temperature {
+.Analyze {
   height: 350px;
   &__Box {
     margin-top: 15px;

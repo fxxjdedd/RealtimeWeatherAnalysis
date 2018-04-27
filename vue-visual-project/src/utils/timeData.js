@@ -4,22 +4,19 @@ export function timeData (startTime, endTime, timeType) {
 
   if (timeType === 'year') {
     timeMultiple = 365
-    startTime = moment(startTime, 'YYYYMMDD').format('YYYY')
-    endTime = moment(endTime, 'YYYYMMDD').format('YYYY')
   } else if (timeType === 'month') {
     timeMultiple = 30
-    startTime = moment(startTime, 'YYYYMMDD').format('YYYYMM')
-    endTime = moment(endTime, 'YYYYMMDD').format('YYYYMM')
   } else {
     timeMultiple = 1
   }
-  let timeLong = endTime - startTime
+  let timeLong = moment(endTime, 'YYYYMMDD').diff(moment(startTime, 'YYYYMMDD'), 'days')
+  timeLong = Math.ceil(timeLong / timeMultiple)
   if (timeLong < 12) {
-    return timeLong * timeMultiple
+    return timeMultiple
   } else if (timeLong < 24) {
-    return parseInt(timeLong / 2) * timeMultiple
+    return 2 * timeMultiple
   } else if (timeLong < 36) {
-    return parseInt(timeLong / 3) * timeMultiple
+    return 3 * timeMultiple
   } else {
     return parseInt(timeLong / 10) * timeMultiple
   }

@@ -23,9 +23,11 @@ Vue.filter('F2C', function (value) {
   const func = r => {
     r.MAX = r.MAX + ''
     r.MIN = r.MIN + ''
+    if (r.LAST_TEMP) {
+      r.LAST_TEMP = r.LAST_TEMP ? ((+r.LAST_TEMP - 32) / 1.8).toFixed(1) : 'loading'
+    }
     return Object.assign({}, r, {
       TEMP: ((+r.TEMP - 32) / 1.8).toFixed(1),
-      LAST_TEMP: r.LAST_TEMP ? ((+r.LAST_TEMP - 32) / 1.8).toFixed(1) : 'loading',
       MAX: ((+r.MAX.replace('*', '') - 32) / 1.8).toFixed(1),
       MIN: ((+r.MIN.replace('*', '') - 32) / 1.8).toFixed(1)
     })
