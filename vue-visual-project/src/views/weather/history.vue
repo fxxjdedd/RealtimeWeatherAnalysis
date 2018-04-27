@@ -90,9 +90,9 @@ export default {
   },
   methods: {
     async allData () {
-      const vuexData= this.$store.state.filterData
-      for(const key in vuexData) {
-        if(key != "todayWeather"){
+      const vuexData = this.$store.state.filterData
+      for (const key in vuexData) {
+        if (key !== 'todayWeather') {
           const {data} = await getData(vuexData[key])
           this[key] = data
         }
@@ -113,7 +113,7 @@ export default {
         }
       }
       this.chartSettings = {}
-      this.title ={text: '降水'}
+      this.title = {text: '降水'}
 
       this.chartVisualMap = {
         type: 'continuous',

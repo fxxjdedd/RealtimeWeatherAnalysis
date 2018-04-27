@@ -1,4 +1,5 @@
-import {fetch, timeData} from '@/utils'
+import {fetch} from '@/utils'
+// import {fetch, timeData} from '@/utils'
 // export function getData (allData) {
 //   const data = {}
 //   data.startTime = allData.startTime
