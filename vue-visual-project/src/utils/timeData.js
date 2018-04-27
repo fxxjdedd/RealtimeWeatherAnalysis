@@ -1,15 +1,26 @@
+import moment from 'moment'
 export function timeData (startTime, endTime, timeType) {
   let timeMultiple = 1
 
   if (timeType === 'year') {
     timeMultiple = 365
+    startTime = moment(startTime, 'YYYYMMDD').format('YYYY')
+    endTime = moment(endTime, 'YYYYMMDD').format('YYYY')
   } else if (timeType === 'month') {
     timeMultiple = 30
+    startTime = moment(startTime, 'YYYYMMDD').format('YYYYMM')
+    endTime = moment(endTime, 'YYYYMMDD').format('YYYYMM')
   } else {
     timeMultiple = 1
   }
   let timeLong = endTime - startTime
-  timeLong = Math.ceil(timeLong / (24 * 3600 * 1000 * timeMultiple))
-  console.log(timeLong * timeMultiple, timeMultiple)
-  return timeLong < 12 ? timeLong * timeMultiple : 12 * timeMultiple
+  if (timeLong < 12) {
+    return timeLong * timeMultiple
+  } else if (timeLong < 24) {
+    return parseInt(timeLong / 2) * timeMultiple
+  } else if (timeLong < 36) {
+    return parseInt(timeLong / 3) * timeMultiple
+  } else {
+    return parseInt(timeLong / 10) * timeMultiple
+  }
 }

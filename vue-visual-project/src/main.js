@@ -11,17 +11,21 @@ import axios from 'axios'
 // 引入echarts
 import echarts from 'echarts'
 import App from './App'
+import moment from 'moment'
 Vue.use(ElementUI)
 Vue.use(VCharts)
 Vue.config.productionTip = false
 Vue.prototype.$echarts = echarts
 Vue.prototype.axios = axios
+Vue.prototype.moment = moment
+
 Vue.filter('F2C', function (value) {
   const func = r => {
     r.MAX = r.MAX + ''
     r.MIN = r.MIN + ''
     return Object.assign({}, r, {
       TEMP: ((+r.TEMP - 32) / 1.8).toFixed(1),
+      LAST_TEMP: r.LAST_TEMP ? ((+r.LAST_TEMP - 32) / 1.8).toFixed(1) : 'loading',
       MAX: ((+r.MAX.replace('*', '') - 32) / 1.8).toFixed(1),
       MIN: ((+r.MIN.replace('*', '') - 32) / 1.8).toFixed(1)
     })

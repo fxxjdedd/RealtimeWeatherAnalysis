@@ -1,87 +1,223 @@
 <template>
-  <el-container>
-    <el-main>
-      <el-row>
-        <el-col :span="16">
-            <div>
-                <ve-line :data="chartData"
-                     :settings="chartSettings"
-                     height="500px"></ve-line>
-            </div>
-        </el-col>
-        <el-col :span="8">
-                <ve-pie :data="chartData1"
-                        :settings="chartSettings1"
-                        height="300px"></ve-pie>
-            <div style="height:150px;background-color:green">
-                预测
-            </div>
-        </el-col>
+  <div class="Temperature">
+    <el-row>
+      <el-col :span="24">
+        <line-chart
+          :data="lineChart.data | F2C"
+          :settings="lineChart.settings"
+          :range="range"
+          @change="range = arguments[0]">
+        </line-chart>
+      </el-col>
     </el-row>
-    </el-main>
+    <el-row>
+      <el-col class="Temperature__Box" :span="8" style="height: 600px">
+        <span>同比表</span>
+        <el-table
+          :data="mergedData | F2C"
+          heigth="any">
+          <el-table-column
+            label="日期"
+            prop="date">
+          </el-table-column>
+          <el-table-column
+            label="温度 °C"
+            prop="TEMP">
+          </el-table-column>
+          <el-table-column
+            label="同比去年 °C"
+            prop="LAST_TEMP">
+            <template slot-scope="scope">
+              <span style="color: green" v-if="scope.row.LAST_TEMP>scope.row.TEMP">{{scope.row.LAST_TEMP}}</span>
+              <span style="color: red" v-else>{{scope.row.LAST_TEMP}}</span>
+            </template>
+          </el-table-column>
+        </el-table>
 
-  </el-container>
+      </el-col>
+      <el-col class="Temperature__Box" :span="8">
+        <span>温度占比</span>
+        <ve-pie
+          :data="leftPieData.data"
+          :settings="leftPieData.settings"
+          :legend-visible="false"
+          height="350px">
+        </ve-pie>
+      </el-col>
+      <el-col class="Temperature__Box" :span="8" style="height: 600px">
+        <span>天气情况</span>
+        <condition-table :data="rigthConditionData" style="heigth: 600px"></condition-table>
+      </el-col>
+    </el-row>
+  </div>
 </template>
 <script>
-import {getData} from '@/api'
+import {LineChart, ConditionTable} from '@/components/commons'
+import {mapGetters} from 'vuex'
+import moment from 'moment'
+import 'echarts/lib/component/dataZoom'
+import 'echarts/lib/component/title'
+import { getDebouncedRequest } from '@/utils'
 export default {
-  created () {
-    this.getList()
-    this.getPie()
+  components: {
+    LineChart,
+    ConditionTable
+  },
+  data () {
+    return {
+      tableData: [],
+      backData: [],
+      yoyData: [],
+      range: []
+    }
   },
   watch: {
     result: {
       deep: true,
-      immediate: true, // 立即执行
       async handler () {
-        const {data} = await getData(this.result)
-        console.log(data)
-        // this.tableData = data
+        if (!this.request) return
+        const params = Object.assign({}, this.result)
+        const {data} = await this.request(params, 'http://101.201.66.163:3000/api/query')
+        this.tableData = data.data || []
+        this.range = [0, this.tableData.length]
+      }
+    },
+    range: {
+      deep: true,
+      async handler () {
+        const params = Object.assign({}, this.result, {
+          startTime: this.yoyDateRange[0],
+          endTime: this.yoyDateRange[1]
+        })
+        const {data} = await this.request(params, 'http://101.201.66.163:3000/api/query')
+        this.yoyData = data.data || []
       }
     }
   },
+  async created () {
+    this.request = getDebouncedRequest()
+    if (!this.request) return
+    const params = Object.assign({}, this.result)
+    const {data} = await this.request(params, 'http://101.201.66.163:3000/api/query')
+    this.tableData = data.data || []
+    this.range = [0, this.tableData.length]
+  },
   computed: {
+    ...mapGetters([
+      'propertyMap'
+    ]),
     result () {
       return this.$store.state.filterData[this.$route.name]
+    },
+    lineChart () {
+      return {
+        data: {
+          columns: ['city', 'date', 'TEMP', 'DEWP', 'SLP', 'STP', 'VISIB', 'WDSP', 'MXSPD', 'GUST', 'MAX', 'MIN', 'PRCP', 'SNDP', 'FRSHTT'],
+          rows: this.tableData
+        },
+        settings: {
+          metrics: ['TEMP', 'MAX', 'MIN'],
+          dimension: ['date'],
+          area: true,
+          labelMap: this.propertyMap
+        }
+      }
+    },
+    analyzeData () {
+      return this.tableData.slice(this.range[0], this.range[1])
+    },
+    dateRange () {
+      return [this.analyzeData[0].date, this.analyzeData[this.analyzeData.length - 1].date]
+    },
+    yoyDateRange () {
+      return this.dateRange.map(d => {
+        return moment(d, 'YYYYMMDD').subtract(1, 'years').format('YYYYMMDD')
+      })
+    },
+    mergedData () {
+      return this.analyzeData.map((d, i) => {
+        if (!this.yoyData || !this.yoyData[i]) return d
+        return Object.assign({}, d, {LAST_TEMP: this.yoyData[i].TEMP})
+      })
+    },
+    leftPieData () {
+      return {
+        data: {
+          columns: ['key', 'value'],
+          rows: this.leftPieCountData
+        },
+        settings: {
+          dimension: 'key',
+          metrics: 'value'
+        }
+      }
+    },
+    leftPieCountData () {
+      return this.getCountData(this.analyzeData)
+    },
+    rigthConditionData () {
+      return this.getConditionData(this.analyzeData)
     }
   },
   methods: {
-    getList: function () {
-      this.chartData = {
-        columns: ['日期', '成本', '利润'],
-        rows: [
-          { 日期: '1月1日', 成本: 1523, 利润: 1523, 占比: 0.12, 其他: 100 },
-          { 日期: '1月2日', 成本: 1223, 利润: 1523, 占比: 0.345, 其他: 100 },
-          { 日期: '1月3日', 成本: 2123, 利润: 1523, 占比: 0.7, 其他: 100 },
-          { 日期: '1月4日', 成本: 4123, 利润: 1523, 占比: 0.31, 其他: 100 },
-          { 日期: '1月5日', 成本: 3123, 利润: 1523, 占比: 0.12, 其他: 100 },
-          { 日期: '1月6日', 成本: 7123, 利润: 1523, 占比: 0.65, 其他: 100 }
-        ]
+
+    getCountData (arr) {
+      const hash = arr.reduce((item, next) => {
+        let floorTemp = ((parseFloat(next.TEMP) - 32) / 1.8).toFixed(0) + '°C'
+        if (!item[floorTemp]) {
+          item[floorTemp] = 0
+        }
+        item[floorTemp] += 1
+        return item
+      }, {})
+      const result = []
+      for (const key in hash) {
+        result.push({
+          key: key,
+          value: hash[key]
+        })
       }
-      this.chartSettings = {
-        stack: { 售价: ['成本', '利润'] },
-        area: true
-      }
+      return result
     },
-    getPie: function () {
-      this.chartData1 = {
-        columns: ['日期', '成本', '利润'],
-        rows: [
-          { '日期': '1月1号', '成本': 123, '利润': 3 },
-          { '日期': '1月2号', '成本': 1223, '利润': 6 },
-          { '日期': '1月3号', '成本': 2123, '利润': 90 },
-          { '日期': '1月4号', '成本': 4123, '利润': 12 },
-          { '日期': '1月5号', '成本': 3123, '利润': 15 },
-          { '日期': '1月6号', '成本': 7123, '利润': 20 }
-        ]
+    getConditionData (arr) {
+      const hash = arr.reduce((item, next) => {
+        let condition = next.FRSHTT
+        if (!item[condition]) {
+          item[condition] = 0
+        }
+        item[condition] += 1
+        return item
+      }, {})
+      const result = []
+      const conditionMap = {
+        '000000': '晴朗',
+        '000001': '雾天',
+        '000010': '雨天',
+        '000100': '下雪',
+        '001000': '冰雹',
+        '010000': '打雷',
+        '100000': '龙卷风',
+        '110000': '台风'
       }
-      this.chartSettings1 = {
-        dimension: '成本',
-        metrics: '利润'
+      for (const key in hash) {
+        result.push({
+          key: key,
+          msg: conditionMap[key],
+          value: hash[key]
+        })
       }
+      return result
     }
   }
 }
 </script>
-<style scoped>
+<style lang="scss" scoped>
+.Temperature {
+  height: 350px;
+  &__Box {
+    margin-top: 15px;
+    font-weight: bold;
+    text-align: left;
+  }
+}
 </style>
