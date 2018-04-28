@@ -1,0 +1,12 @@
+//
+根据下标获取数据,city填写城市，Index为-1表示从最后一条开始，为0表示从第一条开始
+http://101.201.66.163:3000/api/get?city=%E6%B5%8E%E5%8D%97&index=-1&number=1
+
+//根据日期区间获取数据，interval表示数据间隔
+http://101.201.66.163:3000/api/query?city=%E6%B5%8E%E5%8D%97&startTime=19781224&endTime=19781231&interval=1
+
+
+//获取所有城市列表
+http://101.201.66.163:3000/api/cityList
+
+//获取当前城市列表的数据条数
