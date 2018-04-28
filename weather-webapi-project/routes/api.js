@@ -31,12 +31,18 @@ let insertValueSearch = async (value, isAllowRight, isAllowLeft, lindexAsync, re
     var startIndex = 0;
     var endIndex = count - 1;
     var findIndex = -1;
+    let partition;
     try {
 
         //使用插值查找
+
+        //前四次使用插值查找，后面使用二分
+        let count = 4;
+
         while (1) {
 
             if (startIndex > endIndex) {
+                
                 break;
             }
 
@@ -44,7 +50,7 @@ let insertValueSearch = async (value, isAllowRight, isAllowLeft, lindexAsync, re
             let endData = await lindexAsync(redisKeyName, endIndex);
             if (!startData || !endData)
                 break;
-
+``
             startData = JSON.parse(startData);
             endData = JSON.parse(endData);
 
@@ -52,7 +58,7 @@ let insertValueSearch = async (value, isAllowRight, isAllowLeft, lindexAsync, re
             let dataEndTime = parseInt(endData.date);
 
             if (dataStartTime == dataEndTime) {
-                if (dataStartTime != value || dataStartTime != value)
+                if (dataStartTime != value)
                     break;
             }
 
@@ -68,12 +74,14 @@ let insertValueSearch = async (value, isAllowRight, isAllowLeft, lindexAsync, re
             isAllowRight = false;
 
             //let
-            let partition = parseInt((value - dataStartTime) * (endIndex - startIndex + 1) / (dataEndTime - dataStartTime));
-            if (partition < startIndex)
-                partition = startIndex;
+            if(count >= 0)
+                partition = startIndex + parseInt((value - dataStartTime) * (endIndex - startIndex + 1) / (dataEndTime - dataStartTime));
+            else
+                partition = startIndex + parseInt( (endIndex - startIndex)*.5 );
+
             if (partition > endIndex)
                 partition = endIndex;
-
+            
             let partitionJson = JSON.parse(await lindexAsync(redisKeyName, partition));
             let partitionValue = parseInt(partitionJson.date);
 
@@ -86,7 +94,7 @@ let insertValueSearch = async (value, isAllowRight, isAllowLeft, lindexAsync, re
                 findIndex = partition;
                 break;
             }
-
+            --count;
         }
     } catch (error) {
 
@@ -123,20 +131,21 @@ var queryDataByRange = async (startTime, endTime, keyName, interval) => {
         if (isNaN(count) || count <= 0) {
             throw "count == 0";
         }
-
+ 
         var startIndex = await insertValueSearch(startTime, false, true, lindexAsync, keyName, count);
         if (startIndex == -1)
             throw "no find start in the range";
-
+   
         var endIndex = await insertValueSearch(endTime, true, false, lindexAsync, keyName, count);
         if (endIndex == -1)
             throw "no find end in the range";
+
         if (isNaN(interval)) {
             ret = await lrangeAsync(keyName, startIndex, endIndex);
         }
         else {
 
-            for (let i = startIndex; i < endIndex; i += interval) {
+            for (let i = startIndex; i <= endIndex; i += interval) {
                 let singleRes = await lindexAsync(keyName, i);
                 ret.push(singleRes);
             }
@@ -151,7 +160,36 @@ var queryDataByRange = async (startTime, endTime, keyName, interval) => {
     }
     return ret;
 }
+let queryLen = async(city)=>{
 
+    let redisClient;
+    let ret;
+    try {
+        
+        redisClient = redis.createClient(redisPort, redisIp);
+        const llenAsync = promisify(redisClient.llen).bind(redisClient);
+        const selectAsync = promisify(redisClient.select).bind(redisClient);
+        var res = await selectAsync("1");
+
+        if (res != "OK") {
+            throw res;
+        }
+        ret = await llenAsync(city);
+
+    } catch (error) {
+        throw error;
+    }finally{
+        if(redisClient)
+            redisClient.quit();
+    }
+    return ret;
+}
+
+/**
+ * 
+ * @param {*} startTime 
+ * @param {*} endTime 
+ */
 var queryCityList = async (startTime, endTime) => {
     var ret = [];
 
@@ -229,7 +267,11 @@ var queryByIndex = async (city, index, num) => {
     }
 }
 
-var sendJson = async (response, code, message, data) => {
+var sendJson = async (response, code, message, data,len) => {
+    if(data && !len)
+    {
+        len = data.length;
+    }
     response.writeHead(200, {
         "Content-Type": "application/json;charset=UTF-8",
         "Access-Control-Allow-Origin": "*"
@@ -238,6 +280,7 @@ var sendJson = async (response, code, message, data) => {
     response.end(JSON.stringify({
         code: code,
         message: message,
+        len:len,
         data: data
     }));
 }
@@ -281,9 +324,9 @@ router.get('/query', async (request, response, next) => {
 
 
         if (isNaN(startTime) || startTime < 0)
-            startTime = 0;
+            throw "startTime isNull";
         if (isNaN(endTime))
-            endTime = 20190101;
+            throw "endTime isNull";
 
         var dataArray = [];
         let queryRes = await queryDataByRange(startTime, endTime, city, interval)
@@ -355,6 +398,18 @@ router.get("/predict", async (request, response, next) => {
         sendJson(response, 2, error, null);
     }
 
+});
+
+router.get("/queryLen",async(request,response,next)=>{
+    try {
+        let city = request.query.city;
+
+        if(!city)
+            city = "济南";
+        sendJson(response, 0, "invoke ok!",null,await queryLen(city));
+    } catch (error) {
+        sendJson(response, 1, error, null);
+    }
 });
 
 module.exports = router;
