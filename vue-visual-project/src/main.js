@@ -20,6 +20,7 @@ Vue.prototype.axios = axios
 Vue.prototype.moment = moment
 
 Vue.filter('F2C', function (value) {
+  if (!value) return value
   const func = r => {
     r.MAX = r.MAX + ''
     r.MIN = r.MIN + ''

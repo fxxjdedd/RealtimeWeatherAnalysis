@@ -1,7 +1,7 @@
 <template>
   <div class="time-filter">
-      <div class="time-filter-item">
-        <el-select size="small" v-model="chart" class="chart" placeholder="请选择" v-if="show">
+      <div class="time-filter-item"  v-if="isShow('chart')">
+        <el-select size="small" v-model="chart" class="chart" placeholder="请选择">
           <el-option
             v-for="item in chartOptions"
             :key="item.value"
@@ -10,7 +10,7 @@
           </el-option>
         </el-select>
       </div>
-      <div class="time-filter-item">
+      <div class="time-filter-item"  v-if="isShow('city')">
         <el-select size="small" v-model="city" class="city" placeholder="请选择">
           <el-option
             v-for="item in cityOptions"
@@ -20,8 +20,8 @@
           </el-option>
         </el-select>
       </div>
-      <div class="time-filter-item" v-if="show">
-        <el-select size="small" class="timeType" v-model="timeType" placeholder="类型">
+      <div class="time-filter-item" v-if="isShow('timeType')">
+        <el-select size="small" class="timeType" v-model="timeType" placeholder="类型" >
           <el-option
             v-for="item in options"
             :key="item.value"
@@ -30,7 +30,7 @@
           </el-option>
         </el-select>
       </div>
-      <div class="time-filter-item" v-if="show">
+      <div class="time-filter-item" v-if="isShow('date')">
         <el-date-picker
           size="small"
           v-model="date"
@@ -67,7 +67,13 @@ export default {
           value: 'date',
           label: '天'
         }
-      ]
+      ],
+      filterVisiable: {
+        'date': ['analyze', 'history'],
+        'city': ['analyze', 'history', 'todayWeather'],
+        'timeType': ['analyze'],
+        'chart': ['analyze']
+      }
     }
   },
   computed: {
@@ -126,9 +132,6 @@ export default {
           type: 'endTime'
         })
       }
-    },
-    show () {
-      return this.$route.path !== '/todayWeather'
     }
   },
   created () {
@@ -142,7 +145,9 @@ export default {
   },
   methods: {
     async getTime () {
-      const {data} = await this.axios.get(`${process.env.BASE_API}/api/get?index=-1&num=1`)
+      console.log('TimeFilter, 1')
+
+      const {data} = await this.axios.get(`http://101.201.66.163:3000/api/get?index=-1&num=1`)
       const starttime = this.moment(data.data[0].date, 'YYYYMMDD').subtract(7, 'days').format('YYYYMMDD')
       const endtime = data.data[0].date
       this.$store.commit('updateFilterData', {
@@ -155,10 +160,14 @@ export default {
         type: 'endTime',
         value: endtime
       })
+      console.log('TimeFilter, 2')
     },
     async getCity () {
-      const {data} = await this.axios.get(`${process.env.BASE_API}/api/cityList`, this.result)
+      const {data} = await this.axios.get(`http://101.201.66.163:3000/api/cityList`, this.result)
       this.cityOptions = data.data
+    },
+    isShow (type) {
+      return this.filterVisiable[type].includes(this.$route.name)
     }
   }
 }
