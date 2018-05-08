@@ -12,10 +12,6 @@
           <i class="icon-3lishi"></i>
           <span slot="title">历时数据</span>
       </el-menu-item>
-      <el-menu-item index="/quit">
-          <i class="el-icon-edit"></i>
-          <span slot="title">退出登录</span>
-      </el-menu-item>
     </el-menu>
 </template>
 <script>

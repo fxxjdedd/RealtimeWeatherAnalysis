@@ -1,7 +1,6 @@
 import {fetch, timeData} from '@/utils'
 import moment from 'moment'
 export function getData (allData) {
-  console.log(allData.startTime)
   const data = {}
   if (!allData.startTime) {
     allData.startTime = '19700101'

@@ -193,7 +193,6 @@ export default {
         if (!this.yoyData || !this.yoyData[i]) return d
         const lastData = {}
         lastData['LAST_' + this.keyProp.key] = this.yoyData[i][this.keyProp.key]
-        console.log(lastData)
         return Object.assign({}, d, lastData)
       })
     },
@@ -219,9 +218,7 @@ export default {
   methods: {
     async initTotalData () {
       const params = this.totalParams
-      console.log(params)
       const {data} = await this.request(params, 'http://101.201.66.163:3000/api/query')
-      console.log('请求第')
       this.tableData = data.data || []
       this.range = [0, this.tableData.length]
     },
@@ -233,7 +230,6 @@ export default {
         } else {
           key = parseFloat(next[this.keyProp.key]).toFixed(0)
         }
-        console.log(key)
         if (!item[key]) {
           item[key] = 0
         }
